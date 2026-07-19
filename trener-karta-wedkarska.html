@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Karta wędkarska — trener egzaminacyjny</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  #boot { font-family: system-ui, sans-serif; color: #16333A; padding: 40px 20px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="root"><div id="boot">Ładuję trener egzaminacyjny…</div></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+
+/* ==================== DANE: MATERIAŁY SZKOLENIOWE ==================== */
+
+const CHAPTERS = [
+  {
+    id: "start",
+    title: "Karta wędkarska — podstawy",
+    intro: "Zanim usiądziesz do testu, zrozum, czym jest karta i jak wygląda procedura.",
+    points: [
+      "Podstawa prawna egzaminu to dwa akty: ustawa z 18 kwietnia 1985 r. o rybactwie śródlądowym (karta, zakazy z art. 8, sankcje) oraz rozporządzenie MRiRW z 12 lipca 2023 r. (Dz.U. 2023 poz. 1373 — wymiary, okresy, zasady wędkowania). Do tego dochodzi RAPR Okręgu PZW w Poznaniu. Kartę wydaje starosta właściwy dla Twojego miejsca zamieszkania (w Poznaniu: Starostwo Powiatowe, ul. Jackowskiego 18).",
+      "Kartę wydaje się osobie, która ukończyła 14 lat i zdała egzamin przed komisją PZW. Dzieci poniżej 14 lat oraz cudzoziemcy czasowo przebywający w Polsce są zwolnieni z obowiązku posiadania karty (dzieci łowią pod opieką pełnoletniego posiadacza karty). Młodzież 14–16 lat nie może wędkować nocą bez nadzoru opiekuna.",
+      "Egzamin w Okręgu Poznańskim PZW to pisemny test wyboru. Zakres: zasady amatorskiego połowu ryb, przepisy oraz rozpoznawanie gatunków ryb w Polsce i różnice między nimi. Próg zdawalności: 80%. Opłata: 70 zł (młodzież ucząca się do 19 lat — bezpłatnie). Oficjalny system ćwiczeniowy PZW to kartawedkarska.pl.",
+      "Karta jest dożywotnia. Uwaga: karty wydane przed 31 stycznia 1997 r. utraciły ważność — trzeba zdawać ponownie.",
+      "Z egzaminu zwolnione są osoby ze średnim lub wyższym wykształceniem z zakresu rybactwa.",
+      "Sama karta nie wystarczy do łowienia! Nad wodą PZW musisz mieć trzy rzeczy: kartę wędkarską, legitymację członkowską PZW z opłaconymi składkami oraz zezwolenie na amatorski połów ryb od uprawnionego do rybactwa.",
+      "Kontrolować Cię mogą: Państwowa Straż Rybacka, Społeczna Straż Rybacka, Policja oraz strażnicy łowiska.",
+    ],
+  },
+  {
+    id: "ekologia",
+    title: "Biologia ryb i ekologia wód",
+    intro: "Egzamin PZW pyta też o budowę ryb, rozród i stan środowiska. Te pytania regularnie pojawiają się w teście.",
+    points: [
+      "Woreczek żółtkowy to zapas pokarmu świeżo wyklutego narybku — stanowi źródło pokarmu w pierwszych dniach życia, zanim larwa zacznie żerować samodzielnie.",
+      "Pęcherz pławny umożliwia rybie utrzymywanie pozycji (głębokości) w wodzie bez ciągłego ruchu płetw — to narząd hydrostatyczny, nie oddechowy.",
+      "Śluz pokrywający ciało ryby chroni przed pasożytami i infekcjami oraz zmniejsza tarcie w wodzie. Dlatego rybę wypuszczaną bierzemy mokrą dłonią, żeby nie zetrzeć śluzu.",
+      "Płetwa tłuszczowa (mała, miękka, między grzbietową a ogonową) występuje u ryb łososiowatych — pstrągów, troci, łososia, lipienia, głowacicy.",
+      "Gniazda tarłowe budują m.in. sandacz i łosoś (samce pilnują ikry). Okoń składa ikrę w postaci wstęg, a leszcz i krąp rozrzucają ją na roślinach.",
+      "Temperatura wody wpływa na rozwój ikry (cieplejsza — szybszy rozwój) oraz na natlenienie: zimna woda rozpuszcza WIĘCEJ tlenu niż ciepła.",
+      "Ścieki szkodzą wodom, bo ich rozkład zużywa tlen rozpuszczony w wodzie — może to prowadzić do przyduchy i śnięcia ryb. Nadmierne nęcenie działa podobnie: resztki zanęty gniją i zabierają tlen.",
+      "Roślinność zanurzona (rdestnice, wywłóczniki, moczarka kanadyjska) najlepiej natlenia wody stojące, bo prowadzi fotosyntezę w całej toni.",
+      "Ryby karpiowate to najliczniejsza grupa w polskiej ichtiofaunie — należą tu m.in. płoć, leszcz, karp, lin, kleń, jaź, brzana, świnka, kiełb, strzebla, wzdręga.",
+      "Ławica to duże stado ryb, najczęściej jednego gatunku (np. płocie, leszcze) — nie mylić z 'ławicą' w znaczeniu geograficznym.",
+    ],
+  },
+  {
+    id: "biologia",
+    title: "Rozpoznawanie gatunków i biologia",
+    intro: "Okręg Poznański wprost wymienia to w zakresie egzaminu: rozpoznawanie gatunków ryb w Polsce i wskazywanie różnic między nimi.",
+    points: [
+      "Gatunki OBCE (introdukowane) w polskiej ichtiofaunie, o które pyta egzamin: amur, tołpyga (biała i pstra), pstrąg tęczowy, sumik karłowaty, peluga, a także pyszczak, czebaczek amurski i trawianka. Rodzime są m.in. szczupak, okoń, leszcz, płoć, lin, karaś pospolity, węgorz, miętus, brzana, świnka, jelec, śliz.",
+      "Karp vs karaś: karp ma 2 pary wąsików przy pysku, karaś nie ma żadnych. Karaś srebrzysty (obcy) bywa mylony z pospolitym — ma jaśniejsze, srebrzyste boki i ciemną otrzewną.",
+      "Szczupak vs sandacz: szczupak ma spłaszczony, kaczodzioby pysk i jedną, cofniętą płetwę grzbietową; sandacz (z rodziny okoniowatych) ma dwie płetwy grzbietowe — pierwszą kolczastą — i wyraźne kły.",
+      "Płoć vs wzdręga: wzdręga ma pysk skierowany ku górze, pomarańczowo-czerwone oko i wyraźnie czerwone płetwy; płoć ma czerwone oko i pysk położony bardziej centralnie.",
+      "Leszcz vs krąp: leszcz jest ciemniejszy, ma dłuższą płetwę odbytową i mniejsze oko; krąp ma duże oko i srebrzyste boki.",
+      "Pstrąg potokowy vs tęczowy: tęczowy (obcy) ma wzdłuż boku różowo-tęczową wstęgę i ciemne cętki także na płetwie ogonowej; potokowy (rodzimy) ma czerwone kropki z jasną obwódką i czysty ogon.",
+      "Ryby łososiowate (pstrągi, trocie, łosoś, głowacica, lipień) rozpoznasz po płetwie tłuszczowej — małej, miękkiej płetwie między grzbietową a ogonową.",
+      "Minóg to nie ryba, lecz krągłousty — ma przyssawkę zamiast szczęk. Wszystkie minogi podlegają ochronie gatunkowej.",
+      "Gatunki ryb i minogów pod całkowitą ochroną prawną (jest ich WIĘCEJ NIŻ 15), m.in.: różanka, piskorz, koza, śliz (jako gatunek), strzebla błotna, głowacz białopłetwy, głowacica jako gatunek dziki bywa chroniona lokalnie, ciosa, alosa, parposz, dennik, jesiotr ostronosy, babka czarna, babka mała oraz wszystkie minogi. Tych ryb NIE WOLNO łowić — po złowieniu natychmiast wypuszczamy.",
+    ],
+  },
+  {
+    id: "zasady",
+    title: "Zasady wędkowania",
+    intro: "Najczęstsze pytania egzaminacyjne dotyczą liczby wędek, odległości i zakazów.",
+    points: [
+      "Metoda gruntowa i spławikowa: maksymalnie 2 wędki jednocześnie (RAPR). Wędzisko musi mieć co najmniej 30 cm długości. Przynęta naturalna: 1 haczyk; sztuczna mucha: maks. 2 haczyki po 2 ostrza; sztuczna przynęta (np. wobler): maks. 3 haczyki, każdy z maks. 4 ostrzami (§2 rozporządzenia).",
+      "Metoda spinningowa i muchowa: łowisz na 1 wędkę trzymaną w ręku. Uwaga: przy połowie ryb łososiowatych i lipieni ustawa (art. 8) dopuszcza tylko JEDNĄ wędkę — niezależnie od metody.",
+      "Odległości między wędkującymi: łowiąc z brzegu — min. 10 m od innych wędkujących; spinningując — min. 25 m; łowiąc z lodu — min. 10 m.",
+      "Zakazy odległościowe z art. 8 ustawy o rybactwie śródlądowym: 50 m od budowli i urządzeń hydrotechnicznych piętrzących wodę (jazy, śluzy, zapory), 50 m od rozstawionych w wodzie narzędzi połowowych uprawnionego do rybactwa (sieci!) i oznakowanych krześlisk oraz 75 m od znaku oznaczającego podwodny połów ryb kuszą.",
+      "Zakaz łowienia na żywą lub martwą rybkę (i jej części) w okresie od 1 stycznia do 30 kwietnia (RAPR).",
+      "Art. 8 ustawy zabrania połowu: materiałami wybuchowymi, środkami trującymi i odurzającymi, przez głuszenie, prądem zmiennym oraz narzędziami kaleczącymi (wyjątki: haczyk wędki, harpun kuszy, sznury i pęczki hakowe). Zabroniony jest też tzw. szarpak — łowienie przez ciągłe podnoszenie i opuszczanie przynęty (z wyjątkiem połowu pod lodem). Zabronione jest też używanie sztucznego światła do lokalizowania i wabienia ryb. Podrywka do łowienia przynęty: maks. 1 m × 1 m, oczka min. 5 mm.",
+      "Połów wędką w nocy jest dozwolony, o ile zezwolenie na dane łowisko nie stanowi inaczej. Połów kuszą (łowiectwo podwodne, osobna karta) — wyłącznie w porze dziennej: od godziny po wschodzie słońca do godziny przed zachodem.",
+      "Wędkarz ma obowiązek posiadać przyrząd do wyjmowania haczyków (wypychacz, kleszcze). Rybę poniżej wymiaru lub w okresie ochronnym natychmiast i ostrożnie wypuszczamy.",
+      "Ryby przechowujemy żywe wyłącznie w siatce z miękkiej tkaniny, rozpiętej na obręczach. Każdy łowiący ma własną siatkę.",
+      "Gatunki inwazyjne (raki: pręgowaty, sygnałowy, marmurkowy, luizjański; ryby: trawianka, czebaczek amurski, sumik karłowaty, babki) po złowieniu należy niezwłocznie uśmiercić — nie wolno ich wpuszczać do żadnych wód (§8 rozporządzenia).",
+    ],
+  },
+  {
+    id: "wymiary",
+    title: "Wymiary ochronne",
+    intro: "Wymiar ochronny to długość, do której ryba podlega ochronie — mniejszą wypuszczasz.",
+    points: [
+      "Jak mierzyć: długość ryby to odcinek od POCZĄTKU ZAMKNIĘTEGO PYSKA do KOŃCA NAJDŁUŻSZEGO PROMIENIA PŁETWY OGONOWEJ. To pytanie pada niemal na każdym egzaminie.",
+      "Wartości ogólnopolskie określa §6 rozporządzenia Ministra Rolnictwa i Rozwoju Wsi z 12 lipca 2023 r. (Dz.U. 2023 poz. 1373). Okręgi mogą je ZAOSTRZYĆ: RAPR PZW Poznań podnosi szczupaka i sandacza do 50 cm i dodaje wymiar GÓRNY — ryb od 80 cm też nie wolno zabierać (ochrona tarlaków).",
+      "Kluczowe wymiary znajdziesz w Atlasie ryb w tej aplikacji — każda karta pokazuje wymiar na linijce.",
+      "Okoń i karp nie mają wymiaru w rozporządzeniu, ale w Okręgu Poznańskim obowiązuje: okoń 15 cm (nie dotyczy rzek górskich), karp 30 cm (nie dotyczy rzek).",
+    ],
+  },
+  {
+    id: "okresy",
+    title: "Okresy ochronne",
+    intro: "Okres ochronny to czas tarła — wtedy danego gatunku nie wolno łowić ani zabierać.",
+    points: [
+      "Szczupak: 1 stycznia – 30 kwietnia. Sandacz: 1 marca – 31 maja. Uwaga: boleń od 2023 r. NIE MA okresu ochronnego (ma tylko wymiar 40 cm) — starsze materiały podają nieaktualne daty.",
+      "Sum: 1 stycznia – 31 maja (zmiana z 2023 r. — wcześniej 1 XI–30 VI). Węgorz: 1 grudnia – 31 marca. Miętus: 1 grudnia – koniec lutego (nie dotyczy Odry od ujścia Warty).",
+      "Brzana: 1 stycznia – 30 czerwca. Certa: 1 stycznia – 30 czerwca. Świnka: 1 stycznia – 15 maja.",
+      "Lipień i głowacica: 1 marca – 31 maja. Pstrąg potokowy: 1 września – 31 grudnia (w górnej Wiśle z Sanem i górnej Odrze: do 31 stycznia). Sieja i sielawa: 15 października – 31 grudnia. Łosoś i troć: 1 października – 31 grudnia (na Wiśle odrębne zasady). Troć jeziorowa: 1 września – 31 stycznia. Jesiotr ostronosy: ochrona cały rok.",
+      "Ważna zasada: jeżeli pierwszy albo ostatni dzień okresu ochronnego przypada w dzień ustawowo wolny od pracy, okres ochronny ulega SKRÓCENIU o ten dzień. W RAPR PZW Poznań wyjątkiem jest węgorz — jego okres się nie skraca.",
+      "Gatunki objęte ochroną gatunkową (np. różanka, piekielnica, koza, śliz) — całkowity zakaz połowu przez cały rok.",
+    ],
+  },
+  {
+    id: "limity",
+    title: "Limity dobowe",
+    intro: "Limit dobowy (0:00–24:00) mówi, ile sztuk danego gatunku możesz zabrać w ciągu doby.",
+    points: [
+      "Sum: 1 sztuka na dobę. Głowacica: 1 sztuka na tydzień.",
+      "Szczupak, sandacz, boleń, sieja, troć jeziorowa, troć wędrowna, łosoś: ŁĄCZNIE 2 sztuki na dobę (wszystkie te gatunki razem, nie każdy osobno) — tak stanowi RAPR PZW Poznań.",
+      "Węgorz: 2 sztuki (limit zapisany wprost w §2 ust. 3 rozporządzenia). Karp i lin w Okręgu Poznańskim: po 2 sztuki.",
+      "Lipień i pstrąg potokowy: łącznie 3 sztuki. Certa: 5 sztuk.",
+      "Ryby pozostałych gatunków: łącznie do 5 kg na dobę.",
+      "Ryby przechowujemy w siatce nie dłużej niż 24 godziny i nigdy więcej sztuk, niż wynosi limit dobowy (RAPR PZW Poznań).",
+    ],
+  },
+  {
+    id: "etyka",
+    title: "Zachowanie nad wodą i ochrona środowiska",
+    intro: "Część pytań sprawdza, czy będziesz odpowiedzialnym gospodarzem łowiska.",
+    points: [
+      "Zauważysz zanieczyszczenie wody lub śnięte ryby? Zawiadom zarząd najbliższego koła lub okręgu PZW, Policję, Straż Miejską albo najbliższy organ administracji państwowej lub samorządowej.",
+      "Złowiłeś rybę oznakowaną (ze znaczkiem)? Możesz ją zatrzymać, ale masz obowiązek przesłać do zarządu okręgu PZW znaczek i kilka łusek wyjętych powyżej linii bocznej oraz podać gatunek, długość, ciężar, miejsce, datę i godzinę połowu.",
+      "Stanowisko zostawiasz czyste — zabierasz śmieci (także cudze, jeśli chcesz dobrze wypaść nad wodą i na egzaminie).",
+      "Ryby przeznaczone do zabrania uśmiercamy humanitarnie; pozostałe wypuszczamy z możliwie największą ostrożnością, najlepiej bez wyjmowania z wody.",
+      "Wędkarz ustępuje miejsca zawodom wędkarskim rozgrywanym za zgodą gospodarza wody i stosuje się do oznakowania obrębów ochronnych.",
+      "Sankcje (art. 27–27b ustawy): łowienie bez karty, zezwolenia lub z naruszeniem zakazów to wykroczenie zagrożone grzywną (w części przypadków nie niższą niż 200 zł), a sąd może dodatkowo orzec m.in. przepadek sprzętu wędkarskiego i cofnięcie karty wędkarskiej.",
+    ],
+  },
+];
+
+/* ==================== DANE: ATLAS RYB ==================== */
+/* wymiar: cm wg rozporządzenia Dz.U. 2023 poz. 1373; okres/limit wg RAPR PZW.
+   shape: klucz sylwetki SVG. c1/c2: kolory grzbietu i brzucha. */
+
+const FISHES = [
+  { n: "Szczupak", lat: "Esox lucius", shape: "pike", c1: "#4a6741", c2: "#c9d4a3",
+    wymiar: 45, wymiarNote: "PZW Poznań: do 50 cm ORAZ od 80 cm (górny wymiar!)", okres: "1 I – 30 IV", limit: "łącznie 2 szt.*" },
+  { n: "Sandacz", lat: "Sander lucioperca", shape: "zander", c1: "#5d6b5a", c2: "#d8dcc8",
+    wymiar: 45, wymiarNote: "PZW Poznań: do 50 cm ORAZ od 80 cm (górny wymiar!)", okres: "1 III – 31 V", limit: "łącznie 2 szt.*" },
+  { n: "Okoń", lat: "Perca fluviatilis", shape: "perch", c1: "#556b4a", c2: "#e3d9a8",
+    wymiar: 0, wymiarNote: "PZW Poznań: 15 cm (nie dotyczy rzek górskich)", okres: "brak", limit: "w ramach 5 kg/dobę" },
+  { n: "Sum", lat: "Silurus glanis", shape: "catfish", c1: "#4a4a52", c2: "#c8c2b0",
+    wymiar: 70, okres: "1 I – 31 V", limit: "1 szt." },
+  { n: "Węgorz", lat: "Anguilla anguilla", shape: "eel", c1: "#3d4a3d", c2: "#d6cfa8",
+    wymiar: 50, okres: "1 XII – 31 III", okresNote: "nie skraca się o dzień wolny", limit: "2 szt." },
+  { n: "Boleń", lat: "Leuciscus aspius", shape: "asp", c1: "#5a6e78", c2: "#e8e8e0",
+    wymiar: 40, okres: "brak", okresNote: "rozp. z 2023 r. zniosło okres bolenia", limit: "łącznie 2 szt.*" },
+  { n: "Brzana", lat: "Barbus barbus", shape: "barbel", c1: "#7a6a4a", c2: "#e8dcb8",
+    wymiar: 40, okres: "1 I – 30 VI", limit: "wg zezwolenia okręgu" },
+  { n: "Certa", lat: "Vimba vimba", shape: "vimba", c1: "#5d6470", c2: "#e0e0d8",
+    wymiar: 30, okres: "1 I – 30 VI", okresNote: "dolna Wisła: 1 IX – 30 XI", limit: "PZW Poznań: 5 szt." },
+  { n: "Świnka", lat: "Chondrostoma nasus", shape: "vimba", c1: "#606e60", c2: "#e5e5da",
+    wymiar: 25, okres: "1 I – 15 V", limit: "w ramach 5 kg/dobę" },
+  { n: "Lin", lat: "Tinca tinca", shape: "tench", c1: "#4f5c35", c2: "#c9c47e",
+    wymiar: 25, okres: "brak", limit: "PZW Poznań: 2 szt." },
+  { n: "Karp", lat: "Cyprinus carpio", shape: "carp", c1: "#7a6238", c2: "#e6d194",
+    wymiar: 0, wymiarNote: "PZW Poznań: 30 cm (nie dotyczy rzek)", okres: "brak", limit: "PZW Poznań: 2 szt." },
+  { n: "Jaź", lat: "Leuciscus idus", shape: "asp", c1: "#5f6a5a", c2: "#e8e4d0",
+    wymiar: 25, okres: "brak", limit: "w ramach 5 kg/dobę" },
+  { n: "Kleń", lat: "Squalius cephalus", shape: "asp", c1: "#66705c", c2: "#e4ddc4",
+    wymiar: 25, okres: "brak", limit: "w ramach 5 kg/dobę" },
+  { n: "Wzdręga", lat: "Scardinius erythrophthalmus", shape: "rudd", c1: "#5c6e50", c2: "#e8d8a0",
+    wymiar: 15, okres: "brak", limit: "w ramach 5 kg/dobę" },
+  { n: "Lipień", lat: "Thymallus thymallus", shape: "grayling", c1: "#5d6878", c2: "#dcd8cc",
+    wymiar: 30, okres: "1 III – 31 V", limit: "łącznie 3 szt.***" },
+  { n: "Pstrąg potokowy", lat: "Salmo trutta fario", shape: "trout", c1: "#6e6248", c2: "#e8dcb0",
+    wymiar: 30, wymiarNote: "górna Wisła/San i górna Odra: 25 cm", okres: "1 IX – 31 XII", okresNote: "górna Wisła/San i górna Odra: do 31 I", limit: "łącznie 3 szt.***" },
+  { n: "Miętus", lat: "Lota lota", shape: "burbot", c1: "#5a5244", c2: "#d0c8a8",
+    wymiar: 25, wymiarNote: "w Odrze od ujścia Warty: 30 cm i brak okresu", okres: "1 XII – koniec II", limit: "w ramach 5 kg/dobę" },
+  { n: "Głowacica", lat: "Hucho hucho", shape: "trout", c1: "#8a5a48", c2: "#e8d4b8",
+    wymiar: 70, okres: "1 III – 31 V", limit: "1 szt./tydzień" },
+  { n: "Łosoś", lat: "Salmo salar", shape: "asp", c1: "#6a7a88", c2: "#ecece4",
+    wymiar: 35, okres: "1 X – 31 XII", okresNote: "na Wiśle odrębne zasady", limit: "łącznie 2 szt.*" },
+  { n: "Troć wędrowna", lat: "Salmo trutta m. trutta", shape: "trout", c1: "#707a6a", c2: "#e8e4d4",
+    wymiar: 35, okres: "1 X – 31 XII", okresNote: "na Wiśle odrębne zasady", limit: "łącznie 2 szt.*" },
+  { n: "Troć jeziorowa", lat: "Salmo trutta m. lacustris", shape: "trout", c1: "#5c6a74", c2: "#e4e4dc",
+    wymiar: 50, okres: "1 IX – 31 I", limit: "łącznie 2 szt.*" },
+  { n: "Sieja", lat: "Coregonus maraena", shape: "asp", c1: "#7a8494", c2: "#f0f0ea",
+    wymiar: 35, okres: "15 X – 31 XII", limit: "łącznie 2 szt.*" },
+  { n: "Sielawa", lat: "Coregonus albula", shape: "asp", c1: "#8a94a0", c2: "#f2f2ec",
+    wymiar: 18, okres: "15 X – 31 XII", limit: "w ramach 5 kg/dobę" },
+  { n: "Jelec", lat: "Leuciscus leuciscus", shape: "asp", c1: "#74807a", c2: "#eceae0",
+    wymiar: 15, okres: "brak", limit: "w ramach 5 kg/dobę" },
+  { n: "Rozpiór", lat: "Ballerus ballerus", shape: "vimba", c1: "#68707c", c2: "#e6e6de",
+    wymiar: 25, okres: "brak", limit: "w ramach 5 kg/dobę" },
+];
+
+/* Sylwetki ryb — proste, ale rozpoznawalne kształty w viewBox 220x90 */
+function FishShape({ shape, c1, c2 }) {
+  const eye = (x, y) => (
+    <g><circle cx={x} cy={y} r="4.2" fill="#fff" /><circle cx={x} cy={y} r="2.2" fill="#1c2b2e" /></g>
+  );
+  switch (shape) {
+    case "pike": return (
+      <g>
+        <path d="M12 46 Q30 34 70 33 Q140 30 178 38 L196 32 L206 45 L196 58 L178 52 Q140 60 70 57 Q30 56 12 46 Z" fill={c1} />
+        <path d="M12 46 Q40 50 90 50 Q150 52 178 50 L178 52 Q140 60 70 57 Q30 56 12 46 Z" fill={c2} opacity="0.8" />
+        <path d="M150 34 L166 22 L170 36 Z" fill={c1} /><path d="M150 56 L166 68 L170 54 Z" fill={c1} />
+        <path d="M80 55 L90 66 L98 55 Z" fill={c1} opacity="0.85" />
+        <circle cx="55" cy="40" r="1.8" fill={c2} /><circle cx="80" cy="38" r="1.8" fill={c2} />
+        <circle cx="105" cy="40" r="1.8" fill={c2} /><circle cx="128" cy="39" r="1.8" fill={c2} />
+        {eye(34, 41)}
+      </g>);
+    case "zander": return (
+      <g>
+        <path d="M14 45 Q40 28 90 27 Q150 27 180 38 L200 30 L208 45 L200 60 L180 52 Q150 63 90 63 Q40 62 14 45 Z" fill={c1} />
+        <path d="M14 45 Q50 54 100 55 Q160 55 180 52 Q150 63 90 63 Q40 62 14 45 Z" fill={c2} opacity="0.75" />
+        <path d="M60 28 L64 14 L72 27 L78 13 L86 27 L92 14 L98 28 Z" fill={c1} />
+        <path d="M108 28 Q124 18 142 28 L138 32 Z" fill={c1} />
+        <path d="M70 45 Q90 38 110 45 M120 42 Q138 37 156 44" stroke={c1} strokeWidth="4" fill="none" opacity="0.5" />
+        {eye(38, 39)}
+      </g>);
+    case "perch": return (
+      <g>
+        <path d="M22 47 Q45 20 95 19 Q145 20 172 40 L196 30 L202 47 L196 64 L172 54 Q145 72 95 73 Q45 72 22 47 Z" fill={c1} />
+        <path d="M22 47 Q60 62 110 62 Q150 62 172 54 Q145 72 95 73 Q45 72 22 47 Z" fill={c2} opacity="0.8" />
+        <path d="M62 22 L66 6 L74 20 L80 5 L88 19 L94 6 L100 20 L106 8 L110 21 Z" fill={c1} />
+        <path d="M70 22 L70 66 M92 20 L92 68 M114 22 L114 66 M136 26 L136 62" stroke="#2f4030" strokeWidth="6" opacity="0.45" />
+        <path d="M95 72 L104 84 L114 71 Z" fill="#b0492e" /><path d="M60 68 L66 80 L74 66 Z" fill="#b0492e" />
+        {eye(42, 40)}
+      </g>);
+    case "catfish": return (
+      <g>
+        <path d="M10 44 Q26 22 62 22 Q100 22 130 30 Q170 38 200 42 L200 50 Q170 58 130 62 Q100 68 62 66 Q26 66 10 44 Z" fill={c1} />
+        <path d="M10 44 Q40 58 90 58 Q150 56 200 50 Q170 58 130 62 Q100 68 62 66 Q26 66 10 44 Z" fill={c2} opacity="0.7" />
+        <path d="M100 60 Q150 70 196 52 L200 50 Q170 58 130 62 Z" fill={c1} opacity="0.5" />
+        <path d="M30 30 Q10 18 4 8 M30 30 Q14 26 2 24" stroke={c1} strokeWidth="3.5" fill="none" strokeLinecap="round" />
+        <path d="M36 58 Q28 70 20 76 M46 60 Q42 72 36 80" stroke={c1} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        {eye(34, 36)}
+      </g>);
+    case "eel": return (
+      <g>
+        <path d="M14 36 Q30 26 48 32 Q70 40 92 34 Q120 26 142 36 Q166 46 186 40 Q200 36 208 40 L208 48 Q198 46 186 50 Q164 58 140 48 Q118 38 94 46 Q70 54 46 44 Q28 38 14 46 Z" fill={c1} />
+        <path d="M14 41 Q30 32 48 38 Q70 46 92 40 Q120 32 142 42 Q166 52 186 46 L186 50 Q164 58 140 48 Q118 38 94 46 Q70 54 46 44 Q28 38 14 46 Z" fill={c2} opacity="0.6" />
+        {eye(26, 37)}
+      </g>);
+    case "asp": return (
+      <g>
+        <path d="M16 46 Q42 27 92 26 Q148 26 176 40 L198 33 L204 46 L198 60 L176 52 Q148 66 92 66 Q42 65 16 46 Z" fill={c1} />
+        <path d="M16 46 Q54 58 104 58 Q152 58 176 52 Q148 66 92 66 Q42 65 16 46 Z" fill={c2} opacity="0.8" />
+        <path d="M100 27 L112 14 L122 27 Z" fill={c1} /><path d="M100 65 L110 78 L120 64 Z" fill={c1} />
+        {eye(40, 40)}
+      </g>);
+    case "barbel": return (
+      <g>
+        <path d="M16 50 Q40 28 92 27 Q150 28 178 42 L198 36 L204 48 L198 60 L178 54 Q150 64 92 62 Q40 60 16 50 Z" fill={c1} />
+        <path d="M16 50 Q54 58 104 58 Q152 58 178 54 Q150 64 92 62 Q40 60 16 50 Z" fill={c2} opacity="0.85" />
+        <path d="M30 54 Q26 64 22 68 M40 56 Q38 66 34 72" stroke={c1} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <path d="M96 28 L108 14 L118 28 Z" fill={c1} />
+        {eye(38, 44)}
+      </g>);
+    case "vimba": return (
+      <g>
+        <path d="M18 46 Q30 36 44 40 Q60 26 100 25 Q150 25 178 40 L198 33 L204 46 L198 59 L178 52 Q150 65 100 65 Q60 64 44 52 Q30 56 18 46 Z" fill={c1} />
+        <path d="M18 46 Q56 58 106 58 Q152 58 178 52 Q150 65 100 65 Q60 64 44 52 Q30 56 18 46 Z" fill={c2} opacity="0.8" />
+        <path d="M104 26 L116 13 L126 26 Z" fill={c1} />
+        {eye(36, 42)}
+      </g>);
+    case "tench": return (
+      <g>
+        <path d="M20 46 Q44 24 96 23 Q150 24 174 42 L192 36 Q200 46 192 57 L174 51 Q150 68 96 69 Q44 68 20 46 Z" fill={c1} />
+        <path d="M20 46 Q58 60 106 60 Q150 60 174 51 Q150 68 96 69 Q44 68 20 46 Z" fill={c2} opacity="0.7" />
+        <path d="M100 24 Q114 12 128 24 Q120 30 100 24 Z" fill={c1} />
+        <path d="M100 68 Q112 80 126 68 Q118 62 100 68 Z" fill={c1} />
+        {eye(42, 40)}
+      </g>);
+    case "carp": return (
+      <g>
+        <path d="M20 48 Q42 18 98 17 Q152 18 176 42 L196 34 L202 48 L196 62 L176 54 Q152 76 98 77 Q42 76 20 48 Z" fill={c1} />
+        <path d="M20 48 Q60 66 110 66 Q152 64 176 54 Q152 76 98 77 Q42 76 20 48 Z" fill={c2} opacity="0.8" />
+        <path d="M70 18 L76 6 L84 17 L92 5 L100 17 L108 7 L114 18 L128 18 Q120 24 70 18 Z" fill={c1} />
+        <path d="M30 54 Q27 62 24 66" stroke={c1} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <path d="M64 30 A10 10 0 0 1 64 50 M84 26 A12 12 0 0 1 84 54 M104 26 A12 12 0 0 1 104 54 M124 28 A11 11 0 0 1 124 52" stroke="#5c4a26" strokeWidth="2" fill="none" opacity="0.4" />
+        {eye(40, 40)}
+      </g>);
+    case "rudd": return (
+      <g>
+        <path d="M26 46 Q48 24 96 23 Q142 24 166 42 L188 34 L194 46 L188 59 L166 51 Q142 68 96 69 Q48 68 26 46 Z" fill={c1} />
+        <path d="M26 46 Q62 60 106 60 Q146 58 166 51 Q142 68 96 69 Q48 68 26 46 Z" fill={c2} opacity="0.8" />
+        <path d="M102 24 L112 12 L122 24 Z" fill="#b0492e" />
+        <path d="M96 68 L104 80 L114 66 Z" fill="#b0492e" /><path d="M58 64 L64 76 L72 62 Z" fill="#b0492e" />
+        {eye(44, 40)}
+      </g>);
+    case "grayling": return (
+      <g>
+        <path d="M18 48 Q42 30 92 29 Q148 29 176 42 L198 35 L204 48 L198 60 L176 53 Q148 66 92 66 Q42 65 18 48 Z" fill={c1} />
+        <path d="M18 48 Q54 58 104 58 Q152 58 176 53 Q148 66 92 66 Q42 65 18 48 Z" fill={c2} opacity="0.8" />
+        <path d="M66 30 Q72 6 88 4 Q104 4 108 12 Q112 22 108 30 Z" fill="#6b5a80" opacity="0.9" />
+        <path d="M74 24 L74 8 M84 26 L84 6 M94 27 L94 8 M102 28 L102 12" stroke={c1} strokeWidth="2" opacity="0.5" />
+        <circle cx="128" cy="34" r="2.5" fill={c1} opacity="0.9" /><circle cx="140" cy="42" r="2" fill={c1} opacity="0.9" />
+        {eye(38, 42)}
+      </g>);
+    case "trout": return (
+      <g>
+        <path d="M16 46 Q42 26 92 25 Q148 25 176 40 L198 32 L204 46 L198 60 L176 52 Q148 66 92 66 Q42 65 16 46 Z" fill={c1} />
+        <path d="M16 46 Q54 58 104 58 Q152 58 176 52 Q148 66 92 66 Q42 65 16 46 Z" fill={c2} opacity="0.85" />
+        <path d="M92 26 L104 14 L114 26 Z" fill={c1} /><circle cx="148" cy="32" r="4" fill={c1} />
+        <circle cx="66" cy="36" r="3" fill="#b0492e" opacity="0.85" /><circle cx="88" cy="42" r="3" fill="#3a3a3a" opacity="0.7" />
+        <circle cx="110" cy="36" r="3" fill="#b0492e" opacity="0.85" /><circle cx="128" cy="44" r="3" fill="#3a3a3a" opacity="0.7" />
+        <circle cx="78" cy="30" r="2.4" fill="#3a3a3a" opacity="0.6" /><circle cx="100" cy="48" r="2.4" fill="#b0492e" opacity="0.8" />
+        {eye(38, 40)}
+      </g>);
+    case "burbot": return (
+      <g>
+        <path d="M12 44 Q28 30 60 30 Q100 30 130 36 Q168 42 196 40 L202 46 Q180 54 150 56 Q110 60 70 58 Q32 58 12 44 Z" fill={c1} />
+        <path d="M12 44 Q40 54 90 54 Q150 54 196 44 L202 46 Q180 54 150 56 Q110 60 70 58 Q32 58 12 44 Z" fill={c2} opacity="0.7" />
+        <path d="M90 32 Q140 26 194 40 L196 40 Q168 42 130 36 Z" fill={c1} opacity="0.6" />
+        <path d="M28 50 Q26 60 24 66" stroke={c1} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <path d="M60 36 Q80 40 100 38 M110 40 Q130 44 150 42" stroke="#3a3428" strokeWidth="3" fill="none" opacity="0.4" />
+        {eye(30, 38)}
+      </g>);
+    default: return null;
+  }
+}
+
+/* ==================== DANE: BANK PYTAŃ ==================== */
+/* o: opcje, k: indeks poprawnej, e: wyjaśnienie, cat: kategoria */
+
+const QUESTIONS = [
+  { q: "Od jakiego wieku wydawana jest karta wędkarska?", o: ["Od 12 lat", "Od 14 lat", "Od 16 lat"], k: 1, cat: "Prawo", e: "Kartę wędkarską wydaje się osobie, która ukończyła 14 lat. Młodsze dzieci wędkują pod opieką dorosłego z kartą." },
+  { q: "Kto wydaje kartę wędkarską?", o: ["Zarząd okręgu PZW", "Starosta właściwy dla miejsca zamieszkania", "Wody Polskie"], k: 1, cat: "Prawo", e: "Kartę wydaje starosta właściwy ze względu na miejsce zamieszkania — w praktyce starostwo powiatowe lub urząd miasta." },
+  { q: "Czy dziecko poniżej 14 lat może wędkować?", o: ["Nie, w żadnym wypadku", "Tak, samodzielnie po zdaniu egzaminu", "Tak, pod opieką osoby pełnoletniej posiadającej kartę"], k: 2, cat: "Prawo", e: "Osoby do lat 14 są zwolnione z obowiązku posiadania karty, ale łowią wyłącznie pod opieką pełnoletniego posiadacza karty." },
+  { q: "Jakie dokumenty musi mieć wędkarz nad wodą PZW?", o: ["Tylko kartę wędkarską", "Kartę wędkarską, legitymację PZW ze składkami i zezwolenie", "Dowód osobisty i zezwolenie"], k: 1, cat: "Prawo", e: "Komplet to: karta wędkarska + legitymacja członkowska PZW z opłaconymi składkami + zezwolenie od uprawnionego do rybactwa." },
+  { q: "Karta wędkarska wydana w 1995 roku jest dziś:", o: ["Ważna bezterminowo", "Nieważna — karty sprzed 31.01.1997 utraciły ważność", "Ważna po opłaceniu składki"], k: 1, cat: "Prawo", e: "Karty wydane przed 31 stycznia 1997 r. utraciły ważność. Trzeba ponownie zdać egzamin." },
+  { q: "Kto jest zwolniony z egzaminu na kartę wędkarską?", o: ["Osoby powyżej 60 roku życia", "Osoby ze średnim lub wyższym wykształceniem z zakresu rybactwa", "Członkowie PZW ze stażem 10 lat"], k: 1, cat: "Prawo", e: "Zwolnienie przysługuje wyłącznie osobom z wykształceniem średnim lub wyższym z zakresu rybactwa (art. 7 ustawy o rybactwie śródlądowym)." },
+  { q: "Czy sama karta wędkarska uprawnia do łowienia na wodach PZW?", o: ["Tak", "Nie — potrzebne jest jeszcze zezwolenie uprawnionego do rybactwa", "Tak, ale tylko w dni robocze"], k: 1, cat: "Prawo", e: "Karta potwierdza kwalifikacje. Do łowienia na konkretnej wodzie potrzebujesz zezwolenia jej gospodarza (np. okręgu PZW)." },
+  { q: "Kto może kontrolować wędkarza nad wodą?", o: ["Wyłącznie Policja", "Państwowa Straż Rybacka, Społeczna Straż Rybacka, Policja", "Tylko prezes koła PZW"], k: 1, cat: "Prawo", e: "Kontrolę prowadzą PSR, SSR i Policja; na łowiskach także upoważnieni strażnicy gospodarza wody." },
+  { q: "Jak mierzy się długość (wymiar) ryby?", o: ["Od oka do nasady ogona", "Od początku zamkniętego pyska do końca najdłuższego promienia płetwy ogonowej", "Od pyska do nasady płetwy ogonowej"], k: 1, cat: "Zasady", e: "Definicja z rozporządzenia: od początku zamkniętego pyska do końca najdłuższego promienia płetwy ogonowej. Klasyk egzaminacyjny." },
+  { q: "Na ile wędek można łowić jednocześnie metodą gruntową lub spławikową?", o: ["Na 1", "Na 2", "Na 3"], k: 1, cat: "Zasady", e: "Maksymalnie 2 wędki jednocześnie, każda z przynętą naturalną." },
+  { q: "Na ile wędek łowi się metodą spinningową?", o: ["Na 1 wędkę trzymaną w ręku", "Na 2 wędki", "Bez ograniczeń"], k: 0, cat: "Zasady", e: "Spinning i mucha: jedna wędka trzymana w ręku. Przy rybach łososiowatych i lipieniach ustawa zawsze dopuszcza tylko jedną wędkę (art. 8)." },
+  { q: "Jaką minimalną odległość zachowuje się od innych wędkujących łowiąc z brzegu?", o: ["5 m", "10 m", "25 m"], k: 1, cat: "Zasady", e: "Z brzegu i z lodu: min. 10 m. Przy spinningowaniu: min. 25 m." },
+  { q: "Jaką odległość od innych łowiących zachowuje spinningista?", o: ["10 m", "25 m", "50 m"], k: 1, cat: "Zasady", e: "Metoda spinningowa wymaga zachowania min. 25 m odstępu od innych wędkujących." },
+  { q: "W jakiej minimalnej odległości od budowli hydrotechnicznych piętrzących wodę obowiązuje zakaz połowu?", o: ["25 m", "50 m", "100 m"], k: 1, cat: "Zasady", e: "Art. 8 ust. 1 pkt 4 ustawy o rybactwie śródlądowym: zakaz połowu w odległości mniejszej niż 50 m od budowli i urządzeń hydrotechnicznych piętrzących wodę." },
+  { q: "Czy wolno poławiać ryby przez ich głuszenie?", o: ["Tak, zimą spod lodu", "Nie, jest to bezwzględnie zabronione", "Tak, za zgodą gospodarza wody"], k: 1, cat: "Zasady", e: "Art. 8 ustawy: głuszenie ryb jest zabronione zawsze, podobnie jak materiały wybuchowe, środki trujące i odurzające." },
+  { q: "W jakim okresie zabrania się łowić na żywą lub martwą rybkę?", o: ["Nie ma takiego ograniczenia", "1 stycznia – 30 kwietnia", "1 marca – 30 czerwca"], k: 1, cat: "Zasady", e: "Zakaz stosowania żywej i martwej ryby (oraz jej części) jako przynęty obowiązuje od 1 stycznia do 30 kwietnia." },
+  { q: "Co zrobić z rybą złowioną poniżej wymiaru ochronnego?", o: ["Można ją zabrać, jeśli jest ranna", "Niezwłocznie i ostrożnie wypuścić do wody", "Przekazać innemu wędkarzowi"], k: 1, cat: "Zasady", e: "Rybę niewymiarową lub złowioną w okresie ochronnym natychmiast wypuszczamy, z możliwie największą ostrożnością." },
+  { q: "Czy wędkarz może zatrzymać złowioną rybę oznakowaną?", o: ["Nie, zawsze ją wypuszcza", "Tak, ale przesyła do okręgu PZW znaczek i kilka łusek oraz dane połowu", "Tak, bez żadnych obowiązków"], k: 1, cat: "Zasady", e: "Rybę oznakowaną można zatrzymać, ale należy przesłać znaczek i łuski (spod linii bocznej) oraz podać gatunek, wymiary, miejsce i czas połowu." },
+  { q: "Co powinien zrobić wędkarz widząc zanieczyszczenie wody lub śnięte ryby?", o: ["Zmienić łowisko", "Zawiadomić koło/okręg PZW, Policję, Straż Miejską lub organ administracji", "Wyłowić śnięte ryby"], k: 1, cat: "Etyka", e: "Obowiązkiem jest zawiadomienie zarządu koła lub okręgu PZW, Policji, Straży Miejskiej albo organu administracji państwowej lub samorządowej." },
+  { q: "Połów ryb kuszą dozwolony jest:", o: ["Całą dobę", "Wyłącznie w porze dziennej: od godziny po wschodzie do godziny przed zachodem słońca", "Tylko nocą"], k: 1, cat: "Zasady", e: "Łowiectwo podwodne (osobna karta) tylko w porze dziennej: po upływie godziny od wschodu, nie później niż godzinę przed zachodem słońca." },
+  { q: "Czy połów wędką w nocy jest dozwolony?", o: ["Nigdy", "Tak, o ile zezwolenie na dane łowisko nie stanowi inaczej", "Tylko latem"], k: 1, cat: "Zasady", e: "Nocne wędkowanie jest co do zasady dozwolone — ograniczenia mogą wynikać z zezwolenia na konkretną wodę." },
+  { q: "Jaki przyrząd wędkarz ma obowiązek posiadać?", o: ["Wagę do ważenia ryb", "Przyrząd do wyjmowania haczyków", "Echosondę"], k: 1, cat: "Zasady", e: "Obowiązkowy jest przyrząd do wyjmowania haczyka z pyska ryby (wypychacz, kleszcze), by nie okaleczać ryb." },
+  { q: "Jak przechowuje się złowione ryby żywe?", o: ["W wiadrze z wodą", "W siatce z miękkiej tkaniny rozpiętej na obręczach; każdy łowiący ma własną siatkę", "We wspólnej siatce dla całej grupy"], k: 1, cat: "Zasady", e: "Ryby przechowujemy w siatkach z miękkich nici, rozpiętych na obręczach — każdy wędkarz w swojej." },
+  { q: "Co zrobić ze złowionym rakiem pręgowatym, sygnałowym lub rybą inwazyjną (np. trawianka, czebaczek, sumik karłowaty)?", o: ["Wypuścić z powrotem", "Niezwłocznie uśmiercić — nie wolno wpuszczać ich ani do łowiska, ani do innych wód", "Przenieść do innego zbiornika"], k: 1, cat: "Etyka", e: "§8 rozporządzenia: złowione okazy gatunków nierodzimych/inwazyjnych należy niezwłocznie uśmiercić i nie można ich wpuszczać do żadnych wód." },
+  { q: "Wymiar ochronny szczupaka wg rozporządzenia wynosi:", o: ["40 cm", "45 cm", "55 cm"], k: 1, cat: "Wymiary", e: "Ogólnopolski wymiar szczupaka to 45 cm (Dz.U. 2023 poz. 1373). Uwaga: wiele okręgów PZW podnosi go do 50 cm." },
+  { q: "Wymiar ochronny sandacza wg rozporządzenia wynosi:", o: ["35 cm", "45 cm", "60 cm"], k: 1, cat: "Wymiary", e: "Sandacz: 45 cm wg rozporządzenia; okręgi PZW często stosują 50 cm." },
+  { q: "Wymiar ochronny suma wynosi:", o: ["50 cm", "70 cm", "90 cm"], k: 1, cat: "Wymiary", e: "Sum europejski: 70 cm." },
+  { q: "Wymiar ochronny węgorza wynosi:", o: ["45 cm", "50 cm", "60 cm"], k: 1, cat: "Wymiary", e: "Węgorz: 50 cm (§6 rozporządzenia). Dobowy limit 2 szt. jest zapisany wprost w §2 ust. 3 rozporządzenia. Okres ochronny: 1 XII – 31 III." },
+  { q: "Wymiar ochronny lina wynosi:", o: ["20 cm", "25 cm", "30 cm"], k: 1, cat: "Wymiary", e: "Lin: 25 cm. Limit dobowy: 4 sztuki." },
+  { q: "Wymiar ochronny bolenia wynosi:", o: ["30 cm", "40 cm", "50 cm"], k: 1, cat: "Wymiary", e: "Boleń: 40 cm. Wchodzi też do wspólnego limitu 2 szt. ze szczupakiem i sandaczem." },
+  { q: "Wymiar ochronny brzany wynosi:", o: ["30 cm", "40 cm", "50 cm"], k: 1, cat: "Wymiary", e: "Brzana: 40 cm, okres ochronny 1 I – 30 VI." },
+  { q: "Podaj wymiar ochronny wzdręgi:", o: ["Poniżej 15 cm", "Poniżej 20 cm", "Brak wymiaru ochronnego"], k: 0, cat: "Wymiary", e: "Wzdręga ma wymiar ochronny 15 cm — to pytanie pojawia się w poznańskich zestawach egzaminacyjnych." },
+  { q: "Wymiar ochronny lipienia wynosi:", o: ["25 cm", "30 cm", "35 cm"], k: 1, cat: "Wymiary", e: "Lipień: 30 cm, okres ochronny 1 III – 31 V." },
+  { q: "Wymiar ochronny pstrąga potokowego wynosi:", o: ["25 cm", "30 cm", "40 cm"], k: 1, cat: "Wymiary", e: "Pstrąg potokowy: 30 cm, okres ochronny 1 IX – 31 XII." },
+  { q: "Wymiar ochronny certy wynosi:", o: ["25 cm", "30 cm", "35 cm"], k: 1, cat: "Wymiary", e: "Certa: 30 cm, okres ochronny 1 I – 30 VI." },
+  { q: "Wymiar ochronny świnki wynosi:", o: ["20 cm", "25 cm", "30 cm"], k: 1, cat: "Wymiary", e: "Świnka: 25 cm, okres ochronny 1 I – 15 V." },
+  { q: "Czy okoń ma ogólnopolski wymiar ochronny?", o: ["Tak, 20 cm", "Nie — ale okręgi mogą wprowadzić własny (np. 15–18 cm)", "Tak, 25 cm"], k: 1, cat: "Wymiary", e: "Rozporządzenie nie określa wymiaru okonia; lokalne regulaminy często go wprowadzają — sprawdzaj zezwolenie." },
+  { q: "Okres ochronny szczupaka to:", o: ["1 grudnia – 30 kwietnia", "1 marca – 31 maja", "1 stycznia – 30 kwietnia"], k: 2, cat: "Okresy", e: "Szczupak: 1 I – 30 IV. Zbiega się z zakazem łowienia na żywca i trupka." },
+  { q: "Okres ochronny sandacza to:", o: ["1 marca – 31 maja", "1 stycznia – 30 kwietnia", "Brak okresu"], k: 0, cat: "Okresy", e: "Sandacz: 1 III – 31 V (§7 rozporządzenia). Szczupak jest chroniony wcześniej (1 I – 30 IV), sandacz później — trze się przy cieplejszej wodzie." },
+  { q: "Okres ochronny suma to:", o: ["1 stycznia – 31 maja", "1 listopada – 30 czerwca", "1 maja – 31 lipca"], k: 0, cat: "Okresy", e: "Sum: 1 I – 31 V (§7 rozporządzenia z 12.07.2023 r.). Uwaga: stare materiały podają 1 XI – 30 VI z poprzedniego rozporządzenia — to już nieaktualne." },
+  { q: "Okres ochronny węgorza to:", o: ["1 grudnia – 31 marca", "1 stycznia – 30 kwietnia", "Brak okresu"], k: 0, cat: "Okresy", e: "Węgorz: 1 XII – 31 III." },
+  { q: "Czy boleń ma okres ochronny?", o: ["Tak, 1 stycznia – 30 kwietnia", "Nie — rozporządzenie z 2023 r. nie przewiduje okresu ochronnego bolenia", "Tak, 1 marca – 31 maja"], k: 1, cat: "Okresy", e: "W §7 rozporządzenia z 12.07.2023 r. boleń nie występuje — ma tylko wymiar ochronny (40 cm) i wspólny limit dobowy ze szczupakiem i sandaczem. Starsze materiały podają 1 I – 30 IV z poprzednich przepisów." },
+  { q: "Okres ochronny brzany to:", o: ["1 stycznia – 30 czerwca", "1 września – 31 grudnia", "Brak okresu"], k: 0, cat: "Okresy", e: "Brzana: 1 I – 30 VI. Taki sam okres ma certa." },
+  { q: "Okres ochronny świnki to:", o: ["1 stycznia – 15 maja", "1 czerwca – 31 sierpnia", "Brak okresu"], k: 0, cat: "Okresy", e: "Świnka: 1 I – 15 V." },
+  { q: "Okres ochronny lipienia to:", o: ["1 marca – 31 maja", "1 września – 31 grudnia", "1 stycznia – 30 kwietnia"], k: 0, cat: "Okresy", e: "Lipień: 1 III – 31 V. Uwaga: pstrąg potokowy odwrotnie — chroniony jesienią i zimą (1 IX – 31 XII)." },
+  { q: "Okres ochronny pstrąga potokowego to:", o: ["1 marca – 31 maja", "1 września – 31 grudnia", "1 stycznia – 30 kwietnia"], k: 1, cat: "Okresy", e: "Pstrąg potokowy trze się jesienią, stąd ochrona 1 IX – 31 XII." },
+  { q: "Okres ochronny miętusa to:", o: ["1 grudnia – koniec lutego", "1 marca – 31 maja", "1 czerwca – 31 sierpnia"], k: 0, cat: "Okresy", e: "Miętus (jedyny słodkowodny dorszowaty) trze się zimą: ochrona 1 XII – koniec lutego." },
+  { q: "Pierwszy dzień okresu ochronnego wypada w święto. Co wtedy?", o: ["Okres wydłuża się o jeden dzień", "Okres ulega skróceniu o ten dzień", "Nic się nie zmienia"], k: 1, cat: "Okresy", e: "Jeżeli pierwszy lub ostatni dzień okresu ochronnego przypada w dzień ustawowo wolny od pracy, okres skraca się o ten dzień." },
+  { q: "Dobowy limit połowu suma wynosi:", o: ["1 sztuka", "2 sztuki", "3 sztuki"], k: 0, cat: "Limity", e: "Sum: 1 sztuka na dobę (doba liczona 0:00–24:00)." },
+  { q: "Ile łącznie sztuk szczupaka, sandacza i bolenia można zabrać w ciągu doby?", o: ["Po 2 sztuki każdego gatunku", "Łącznie 2 sztuki wszystkich tych gatunków", "Łącznie 5 sztuk"], k: 1, cat: "Limity", e: "W Okręgu PZW Poznań wspólny limit 2 szt. na dobę obejmuje ŁĄCZNIE: szczupaka, sandacza, bolenia, sieję, troć jeziorową, troć wędrowną i łososia." },
+  { q: "Dobowy limit połowu węgorza wynosi:", o: ["1 sztuka", "2 sztuki", "4 sztuki"], k: 1, cat: "Limity", e: "Węgorz: 2 sztuki na dobę." },
+  { q: "Dobowy limit lina na wodach Okręgu PZW w Poznaniu wynosi:", o: ["2 sztuki", "4 sztuki", "Bez limitu"], k: 0, cat: "Limity", e: "RAPR PZW Poznań: karp i lin — po 2 sztuki na dobę. W innych okręgach bywa inaczej (ogólny RAPR: lin 4 szt.), dlatego zawsze czytaj zezwolenie." },
+  { q: "Łączny limit lipienia i pstrąga potokowego wynosi:", o: ["Łącznie 3 sztuki", "Po 3 sztuki każdego", "Łącznie 5 sztuk"], k: 0, cat: "Limity", e: "Lipień i pstrąg potokowy: łącznie 3 sztuki na dobę (RAPR PZW Poznań)." },
+  { q: "Ile ryb pozostałych gatunków (bez limitów sztukowych) można zabrać w ciągu doby?", o: ["Do 3 kg", "Do 5 kg", "Bez ograniczeń"], k: 1, cat: "Limity", e: "Ryby gatunków bez limitu sztukowego: łącznie do 5 kg na dobę." },
+  { q: "Na wodach Okręgu PZW w Poznaniu szczupak i sandacz mają wymiar ochronny:", o: ["Tylko dolny: do 50 cm", "Widełkowy: do 50 cm ORAZ od 80 cm (dużych też się nie zabiera)", "Tylko górny: od 80 cm"], k: 1, cat: "Wymiary", e: "Od 2025 r. RAPR PZW Poznań wprowadza wymiar widełkowy: chronione są ryby do 50 cm i od 80 cm. Duże tarlaki wracają do wody." },
+  { q: "Jak długo można przechowywać złowione ryby w siatce (RAPR PZW Poznań)?", o: ["Do 12 godzin", "Nie dłużej niż 24 godziny", "Bez ograniczeń"], k: 1, cat: "Zasady", e: "RAPR PZW Poznań zabrania przechowywania ryb w siatce dłużej niż 24 godziny i w ilości większej niż limit dobowy." },
+  { q: "Sztuczna przynęta (np. wobler) może mieć maksymalnie:", o: ["2 haczyki po 2 ostrza", "3 haczyki, każdy z maks. 4 ostrzami", "5 haczyków bez ograniczeń ostrzy"], k: 1, cat: "Zasady", e: "§2 rozporządzenia: sztuczna przynęta — nie więcej niż 3 haczyki, każdy z maks. 4 ostrzami w obwodzie koła o średnicy 30 mm. Przynęta naturalna: 1 haczyk; mucha: maks. 2 haczyki po 2 ostrza." },
+  { q: "Minimalna długość wędziska wynosi:", o: ["30 cm", "50 cm", "1 m"], k: 0, cat: "Zasady", e: "§2 rozporządzenia: wędkuje się wędziskiem o długości co najmniej 30 cm z linką." },
+  { q: "Czy wolno używać sztucznego światła do lokalizowania i wabienia ryb?", o: ["Tak, nocą", "Nie — jest to zabronione", "Tak, tylko zimą"], k: 1, cat: "Zasady", e: "§2 rozporządzenia: amatorski połów ryb uprawia się bez stosowania sztucznego światła do lokalizacji i wabienia ryb. Oświetlenie stanowiska (lampka) jest oczywiście dozwolone." },
+  { q: "Jakie warunki musi spełniać podrywka do łowienia ryb na przynętę?", o: ["Siatka maks. 1 m × 1 m, oczka min. 5 mm", "Siatka maks. 2 m × 2 m, dowolne oczka", "Podrywki są zakazane"], k: 0, cat: "Zasady", e: "§2 ust. 5 rozporządzenia: powierzchnia siatki podrywki maks. 1 m × 1 m, oczka nie mniejsze niż 5 mm." },
+  { q: "Czy młodzież w wieku 14–16 lat może wędkować nocą samodzielnie (RAPR PZW Poznań)?", o: ["Tak, bez ograniczeń", "Nie — w porze nocnej wymagany jest nadzór osoby uprawnionej do opieki", "Tylko latem"], k: 1, cat: "Prawo", e: "RAPR PZW Poznań: prawo do samodzielnego wędkowania ma osoba od 14 lat, ale do 16 lat nie wolno wędkować nocą bez nadzoru opiekuna." },
+  { q: "Kto oprócz dzieci do lat 14 jest zwolniony z obowiązku posiadania karty wędkarskiej?", o: ["Emeryci", "Cudzoziemcy czasowo przebywający w Polsce", "Studenci"], k: 1, cat: "Prawo", e: "Ustawa o rybactwie śródlądowym zwalnia z obowiązku posiadania karty osoby do 14 lat oraz cudzoziemców czasowo przebywających w Polsce (nadal potrzebują zezwolenia!)." },
+  { q: "Okres ochronny węgorza a dzień ustawowo wolny od pracy (RAPR PZW Poznań):", o: ["Skraca się jak dla innych gatunków", "Okres ochronny węgorza NIE ulega skróceniu", "Węgorz nie ma okresu ochronnego"], k: 1, cat: "Okresy", e: "Zasada skracania okresu o dzień wolny obowiązuje dla ryb — z wyjątkiem węgorza (RAPR PZW Poznań). Okres węgorza: 1 XII – 31 III." },
+  { q: "Ile wynosi opłata za wydanie karty wędkarskiej?", o: ["10 zł", "30 zł", "70 zł"], k: 0, cat: "Prawo", e: "§5 rozporządzenia: opłata za wydanie karty wędkarskiej to 10 zł. Osobno płaci się za egzamin (w Okręgu Poznańskim 70 zł)." },
+  { q: "W jakiej odległości od rozstawionych w wodzie sieci rybackich (narzędzi uprawnionego do rybactwa) zabroniony jest połów wędką?", o: ["25 m", "50 m", "100 m"], k: 1, cat: "Zasady", e: "Art. 8 ustawy: zakaz połowu wędką bliżej niż 50 m od rozstawionych narzędzi połowowych uprawnionego do rybactwa i oznakowanych krześlisk." },
+  { q: "W jakiej odległości od znaku oznaczającego podwodny połów ryb kuszą nie wolno łowić wędką?", o: ["50 m", "75 m", "100 m"], k: 1, cat: "Zasady", e: "Art. 8 ustawy: zakaz połowu wędką w odległości mniejszej niż 75 m od znaku oznaczającego dokonywanie podwodnego połowu ryb kuszą." },
+  { q: "Iloma wędkami maksymalnie wolno łowić ryby łososiowate i lipienie?", o: ["Jedną", "Dwiema", "Trzema"], k: 0, cat: "Zasady", e: "Art. 8 ustawy: wolno łowić maks. dwiema wędkami jednocześnie, ale w przypadku ryb łososiowatych i lipieni — tylko jedną wędką." },
+  { q: "Czy dozwolone jest łowienie tzw. szarpakiem (ciągłe podnoszenie i opuszczanie przynęty)?", o: ["Tak, zawsze", "Nie — z wyjątkiem połowu ryb pod lodem", "Tylko na rzekach"], k: 1, cat: "Zasady", e: "Art. 8 ustawy zabrania połowu wędką przez podnoszenie i opuszczanie przynęty w sposób ciągły, z wyjątkiem łowienia ryb pod lodem (np. mormyszką)." },
+  { q: "Co grozi za amatorski połów ryb bez karty wędkarskiej lub zezwolenia?", o: ["Tylko pouczenie", "Grzywna, a sąd może orzec też m.in. przepadek sprzętu i cofnięcie karty", "Kara pozbawienia wolności do 5 lat"], k: 1, cat: "Prawo", e: "Art. 27–27b ustawy: to wykroczenie zagrożone grzywną (przy części naruszeń nie niższą niż 200 zł); sąd może dodatkowo orzec przepadek sprzętu wędkarskiego i cofnięcie karty wędkarskiej." },
+  { q: "Co robi się z żywą rybą złowioną w okresie ochronnym lub poniżej wymiaru (art. 9 ustawy)?", o: ["Można ją przenieść do innego łowiska", "Niezwłocznie wypuszcza się ją do tego samego łowiska z niezbędną starannością", "Przekazuje się ją straży rybackiej"], k: 1, cat: "Zasady", e: "Art. 9 ustawy: ryby złowione z naruszeniem art. 8 (okres, wymiar, ochrona gatunkowa), jeżeli są żywe, niezwłocznie wypuszcza się do TEGO SAMEGO łowiska z zachowaniem niezbędnej staranności." },
+  { q: "Które gatunki ryb są OBCE (introdukowane) w polskiej ichtiofaunie?", o: ["peluga, amur, tołpyga, pstrąg tęczowy, sumik karłowaty", "kiełb Kesslera, śliz, jelec, świnka", "stynka, miętus, węgorz"], k: 0, cat: "Biologia", e: "Amur, tołpyga, pstrąg tęczowy, sumik karłowaty i peluga to gatunki obce, sprowadzone do Polski. Śliz, jelec, świnka, stynka, miętus i węgorz są rodzime. To pytanie pojawia się na teście PZW." },
+  { q: "Po czym najłatwiej odróżnić karpia od karasia?", o: ["Po liczbie płetw", "Karp ma 2 pary wąsików, karaś nie ma wąsików", "Karaś jest zawsze większy"], k: 1, cat: "Biologia", e: "Karp ma dwie pary wąsików (czułków) przy pysku. Karaś nie ma żadnych — to najpewniejsza cecha." },
+  { q: "Ile płetw grzbietowych ma sandacz?", o: ["Jedną", "Dwie — pierwszą kolczastą", "Trzy"], k: 1, cat: "Biologia", e: "Sandacz należy do okoniowatych i ma dwie płetwy grzbietowe (pierwsza twarda, kolczasta). Szczupak ma tylko jedną, mocno cofniętą." },
+  { q: "Co odróżnia pstrąga tęczowego (obcego) od potokowego (rodzimego)?", o: ["Tęczowy ma różowo-tęczową wstęgę wzdłuż boku i cętki na ogonie", "Potokowy jest zawsze większy", "Tęczowy nie ma płetwy tłuszczowej"], k: 0, cat: "Biologia", e: "Pstrąg tęczowy ma charakterystyczną tęczową wstęgę wzdłuż linii bocznej oraz ciemne cętki na płetwie ogonowej. Potokowy ma czerwone kropki z jasną obwódką." },
+  { q: "Po jakiej charakterystycznej płetwie rozpoznasz ryby łososiowate?", o: ["Po długiej płetwie odbytowej", "Po płetwie tłuszczowej między grzbietową a ogonową", "Po podwójnej płetwie ogonowej"], k: 1, cat: "Biologia", e: "Łososiowate (pstrągi, trocie, łosoś, lipień, głowacica) mają małą, miękką płetwę tłuszczową między płetwą grzbietową a ogonową." },
+  { q: "Do czego służy wylęgowi ryb woreczek żółtkowy?", o: ["Zapobiega spłynięciu larw z prądem wody", "Stanowi źródło pokarmu", "Nie ma żadnego znaczenia"], k: 1, cat: "Biologia", e: "Woreczek żółtkowy to zapas substancji odżywczych — odżywia świeżo wyklutą larwę, zanim zacznie ona samodzielnie żerować." },
+  { q: "Czy pęcherz pławny ułatwia rybom:", o: ["oddychanie", "trawienie", "utrzymywanie pozycji w wodzie"], k: 2, cat: "Biologia", e: "Pęcherz pławny to narząd hydrostatyczny — pozwala rybie utrzymać głębokość bez ciągłego pływania. Nie służy do oddychania ani trawienia." },
+  { q: "Śluz pokrywający ciało ryby to:", o: ["gatunek ryby chronionej", "wydzielina pokrywająca ciało ryb", "rodzaj smaru do kołowrotków"], k: 1, cat: "Biologia", e: "Śluz to naturalna wydzielina chroniąca skórę ryby przed pasożytami i infekcjami oraz zmniejszająca tarcie. Nie mylić ze 'śliz' — to gatunek ryby." },
+  { q: "U których ryb występuje płetwa tłuszczowa?", o: ["szczupakowate", "sumowate", "łososiowate"], k: 2, cat: "Biologia", e: "Płetwa tłuszczowa (mała, miękka, przy ogonie) to cecha ryb łososiowatych: pstrągów, troci, łososia, lipienia, głowacicy." },
+  { q: "Które ryby budują gniazda tarłowe?", o: ["sandacz, łosoś", "okoń, jazgarz", "leszcz, krąp"], k: 0, cat: "Biologia", e: "Sandacz i łosoś budują gniazda tarłowe i pilnują ikry. Okoń składa ikrę w postaci wstęg, leszcz i krąp rozrzucają ją na roślinności." },
+  { q: "Która grupa ryb obejmuje największą liczbę gatunków w naszej ichtiofaunie?", o: ["łososiowate", "okoniokształtne", "karpiowate"], k: 2, cat: "Biologia", e: "Karpiowate to najliczniejsza grupa — należą tu m.in. płoć, leszcz, karp, lin, kleń, jaź, brzana, świnka, kiełb, strzebla, wzdręga." },
+  { q: "Która z grup gatunków należy do ryb karpiowatych?", o: ["kiełb, strzebla potokowa, brzana", "sandacz, jaź, lin", "świnka, karp, miętus"], k: 0, cat: "Biologia", e: "Kiełb, strzebla i brzana to karpiowate. Uwaga na pułapki: sandacz to okoniowaty, a miętus to dorszowaty — mimo że jaź, lin, świnka i karp są karpiowate." },
+  { q: "Ryba, która rozmnaża się tylko w wodzie, w której żyją małże, to:", o: ["stynka", "sieja", "różanka"], k: 2, cat: "Biologia", e: "Różanka składa ikrę do jamy skrzelowej małży (skójek, szczeżui). Bez małży nie może się rozmnażać — to gatunek pod ochroną." },
+  { q: "Pstrąg potokowy odbywa naturalne tarło tylko w:", o: ["nagrzanych, nasłonecznionych wodach rzek", "płytkich jeziorach", "zimnych wodach górskich potoków"], k: 2, cat: "Biologia", e: "Pstrąg potokowy trze się w zimnych, dobrze natlenionych wodach górskich i podgórskich potoków o kamienistym dnie." },
+  { q: "Która grupa ryb składa ikrę wczesną wiosną?", o: ["kleń, brzana, sum", "szczupak, stynka", "świnka, jaź"], k: 1, cat: "Biologia", e: "Szczupak i stynka należą do ryb wczesnowiosennych — trą się zaraz po ustąpieniu lodu. Sum trze się latem, przy ciepłej wodzie." },
+  { q: "Czy temperatura wody wpływa na rozwój ikry?", o: ["tak", "nie", "tylko u karpiowatych"], k: 0, cat: "Biologia", e: "Tak — im cieplejsza woda (w granicach optimum gatunku), tym szybszy rozwój ikry i wylęg. To podstawowa zależność w biologii ryb." },
+  { q: "Czy temperatura wody wpływa na zawartość tlenu?", o: ["nie ma wpływu", "ma wpływ, bo zimna woda rozpuszcza więcej tlenu niż ciepła", "ma wpływ, bo ciepła woda rozpuszcza więcej tlenu"], k: 1, cat: "Biologia", e: "Zimna woda rozpuszcza więcej tlenu. Dlatego latem, przy wysokich temperaturach, częściej dochodzi do przyduchy i śnięcia ryb." },
+  { q: "Jaka roślinność szczególnie korzystnie wpływa na natlenienie wód stojących?", o: ["zanurzona — rdestnice, wywłóczniki, moczarka kanadyjska", "pływająca — np. grzybienie", "twarda — trzcina, tatarak"], k: 0, cat: "Biologia", e: "Roślinność zanurzona prowadzi fotosyntezę w całej toni wodnej, dostarczając najwięcej tlenu. Rośliny pływające i szuwarowe robią to w mniejszym stopniu." },
+  { q: "Dlaczego ścieki wpływają negatywnie na stan wód?", o: ["bo nie może powstać warstwa lodu", "bo zużywają do swojego rozkładu tlen zawarty w wodzie", "bo zmniejszają przejrzystość wody"], k: 1, cat: "Biologia", e: "Rozkład ścieków przez bakterie zużywa tlen rozpuszczony w wodzie, co prowadzi do niedotlenienia i śnięcia ryb." },
+  { q: "Czy nadmierne nęcenie może być szkodliwe dla wód?", o: ["nie, bo ryby zjadają całą zanętę", "tak, bo resztki niezjedzonej zanęty gniją i zatruwają środowisko", "nie, bo zanęta jest obojętna dla środowiska"], k: 1, cat: "Biologia", e: "Resztki niezjedzonej zanęty gniją, zużywają tlen i zatruwają wodę. Dlatego nęcimy z umiarem." },
+  { q: "Ławica to:", o: ["rodzaj pomostu — ławka dla wędkarza", "szybki nurt w górskiej rzece", "duże stado ryb, najczęściej jednego gatunku"], k: 2, cat: "Biologia", e: "Ławica to zwarte stado ryb tego samego gatunku (np. płocie, leszcze, ukleje). Ryby trzymają się w ławicy dla bezpieczeństwa i efektywnego żerowania." },
+  { q: "Co należy zrobić, gdy w zbiorniku jest zbyt duże pogłowie niepożądanych ryb karpiowatych?", o: ["zarybić tymi samymi gatunkami", "prowadzić intensywny odłów i zarybienie odpowiednimi drapieżnikami", "nic nie robić i czekać na procesy naturalne"], k: 1, cat: "Etyka", e: "Nadmiar ryb karpiowatych redukuje się przez odłów oraz zarybianie drapieżnikami (szczupak, sandacz), które regulują ich liczebność." },
+  { q: "Do czego służy ewidencja (rejestr) połowów?", o: ["do wykazania rekordowych połowów", "do dokumentowania działań gospodarza rybacko-wędkarskiego", "wyłącznie dla potrzeb statystyki"], k: 1, cat: "Etyka", e: "Rejestr połowów dostarcza gospodarzowi wody danych o presji wędkarskiej i pozwala racjonalnie prowadzić gospodarkę rybacką (zarybienia, limity)." },
+  { q: "Wzdręga różni się od płoci przede wszystkim:", o: ["Brakiem łusek", "Pyskiem skierowanym ku górze i wyraźnie czerwonymi płetwami", "Większymi rozmiarami"], k: 1, cat: "Biologia", e: "Wzdręga ma pysk skierowany ku górze (przystosowany do zbierania pokarmu z powierzchni), pomarańczowe oko i intensywnie czerwone płetwy." },
+  { q: "Minóg rzeczny to:", o: ["Ryba drapieżna", "Krągłousty (nie ryba) z przyssawką, objęty ochroną gatunkową", "Gatunek węgorza"], k: 1, cat: "Biologia", e: "Minóg nie jest rybą, lecz krągłoustym — ma przyssawkę zamiast szczęk i podlega ochronie gatunkowej. Nie wolno go łowić." },
+  { q: "Która z ryb jest pod całkowitą ochroną prawną?", o: ["czebaczek amurski", "różanka", "pstrąg źródlany"], k: 1, cat: "Biologia", e: "Różanka to gatunek pod ścisłą ochroną — nie wolno jej łowić. Czebaczek amurski to gatunek inwazyjny (do uśmiercenia), a pstrąg źródlany to ryba łowna." },
+  { q: "Liczba gatunków ryb i minogów objętych w Polsce ochroną gatunkową jest:", o: ["większa niż 15", "w przedziale 10–15", "mniejsza niż 10"], k: 0, cat: "Biologia", e: "Ochroną gatunkową objętych jest więcej niż 15 gatunków ryb i minogów — m.in. różanka, piskorz, koza, strzebla błotna, głowacz białopłetwy, ciosa, alosa, parposz, jesiotr ostronosy, babki i wszystkie minogi." },
+];
+
+/* ==================== KOMPONENTY ==================== */
+
+const C = {
+  bg: "#E8EDE9", ink: "#16333A", card: "#FBFBF7", line: "#C9D3CC",
+  red: "#C03A21", water: "#38707E", green: "#2F6B45", sand: "#E5DFC9",
+};
+
+
+/* Link do zdjęć gatunku — wyszukiwanie po nazwie łacińskiej trafia w artykuł z galerią */
+const photoUrl = (lat) => "https://pl.wikipedia.org/w/index.php?search=" + encodeURIComponent(lat);
+
+function PhotoLink({ lat, small }) {
+  return (
+    <a href={photoUrl(lat)} target="_blank" rel="noopener noreferrer" style={{
+      display: "inline-block", padding: small ? "3px 10px" : "5px 12px", borderRadius: 999,
+      fontSize: small ? 12 : 13, fontWeight: 600, textDecoration: "none",
+      border: "1.5px solid " + C.water, color: C.water, background: "rgba(56,112,126,0.06)",
+    }}>Zobacz zdjęcia ↗</a>
+  );
+}
+
+
+/* Zdjęcie gatunku pobierane z Wikipedii (REST API, CORS). Fallback: grafika SVG. */
+function FishPhoto({ fish, height, rounded }) {
+  const [src, setSrc] = useState(null);
+  const [tried, setTried] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    const grab = async (title) => {
+      try {
+        const r = await fetch("https://pl.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title));
+        if (!r.ok) return null;
+        const d = await r.json();
+        if (d.type === "disambiguation") return null;
+        return (d.thumbnail && d.thumbnail.source) || (d.originalimage && d.originalimage.source) || null;
+      } catch (e) { return null; }
+    };
+    (async () => {
+      let u = await grab(fish.lat);
+      if (!u) u = await grab(fish.n);
+      if (!alive) return;
+      setSrc(u); setTried(true);
+    })();
+    return () => { alive = false; };
+  }, [fish.lat]);
+  const h = height || 170;
+  if (src) {
+    return <img src={src} alt={"Zdjęcie: " + fish.n} loading="lazy"
+      style={{ width: "100%", height: h, objectFit: "cover", borderRadius: rounded ? 8 : 0, display: "block", background: C.bg }}
+      onError={() => setSrc(null)} />;
+  }
+  return (
+    <div style={{ position: "relative", background: C.bg, borderRadius: rounded ? 8 : 0 }}>
+      <svg viewBox="0 0 220 90" style={{ width: "100%", display: "block" }} role="img" aria-label={"Sylwetka: " + fish.n}>
+        <FishShape shape={fish.shape} c1={fish.c1} c2={fish.c2} />
+      </svg>
+      {!tried && <span style={{ position: "absolute", bottom: 4, right: 8, fontSize: 10, opacity: 0.5 }}>ładuję zdjęcie…</span>}
+    </div>
+  );
+}
+
+function Ruler({ wymiar }) {
+  const max = 80;
+  const ticks = [];
+  for (let i = 0; i <= max; i += 5) ticks.push(i);
+  return (
+    <svg viewBox="0 0 220 26" style={{ width: "100%", display: "block" }} aria-hidden="true">
+      <rect x="0" y="8" width="220" height="14" fill={C.sand} rx="2" />
+      {ticks.map((t) => {
+        const x = 6 + (t / max) * 208;
+        const big = t % 10 === 0;
+        return (
+          <g key={t}>
+            <line x1={x} y1="8" x2={x} y2={big ? 17 : 13} stroke={C.ink} strokeWidth="1" opacity="0.7" />
+            {big && <text x={x} y="24" fontSize="6" textAnchor="middle" fill={C.ink} opacity="0.7" fontFamily="inherit">{t}</text>}
+          </g>
+        );
+      })}
+      {wymiar > 0 && (
+        <g>
+          <line x1={6 + (wymiar / max) * 208} y1="0" x2={6 + (wymiar / max) * 208} y2="22" stroke={C.red} strokeWidth="2.5" />
+          <circle cx={6 + (wymiar / max) * 208} cy="3" r="3" fill={C.red} />
+        </g>
+      )}
+    </svg>
+  );
+}
+
+function Pill({ children, tone }) {
+  const colors = { red: C.red, water: C.water, green: C.green, ink: C.ink };
+  const col = colors[tone] || C.ink;
+  return (
+    <span style={{
+      display: "inline-block", padding: "3px 10px", borderRadius: 999, fontSize: 12.5,
+      border: "1.5px solid " + col, color: col, fontWeight: 600, letterSpacing: "0.01em",
+    }}>{children}</span>
+  );
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ---------- Zakładka: Nauka ---------- */
+function Learn() {
+  const [open, setOpen] = useState("start");
+  return (
+    <div>
+      <p style={{ margin: "0 0 18px", fontSize: 15.5, lineHeight: 1.65, opacity: 0.85 }}>
+        Przeczytaj rozdziały po kolei — obejmują pełny zakres egzaminu w Okręgu Poznańskim PZW
+        (Regulamin Amatorskiego Połowu Ryb + rozporządzenie o ochronie i połowie ryb). Potem sprawdź się w zakładce Test.
+      </p>
+      {CHAPTERS.map((ch, i) => {
+        const isOpen = open === ch.id;
+        return (
+          <div key={ch.id} style={{ background: C.card, border: "1.5px solid " + C.line, borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
+            <button onClick={() => setOpen(isOpen ? null : ch.id)} style={{
+              width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer",
+              padding: "14px 16px", display: "flex", alignItems: "baseline", gap: 12, fontFamily: "inherit",
+            }}>
+              <span style={{ fontFamily: "'Zilla Slab', serif", fontSize: 15, color: C.red, fontWeight: 700, minWidth: 24 }}>{i + 1}.</span>
+              <span style={{ fontFamily: "'Zilla Slab', serif", fontSize: 19, fontWeight: 600, color: C.ink, flex: 1 }}>{ch.title}</span>
+              <span style={{ fontSize: 18, color: C.water, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform .2s" }}>›</span>
+            </button>
+            {isOpen && (
+              <div style={{ padding: "0 16px 16px 52px" }}>
+                <p style={{ margin: "0 0 10px", fontStyle: "italic", color: C.water, fontSize: 14.5 }}>{ch.intro}</p>
+                {ch.points.map((p, j) => (
+                  <p key={j} style={{ margin: "0 0 10px", fontSize: 15, lineHeight: 1.6 }}>{p}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------- Zakładka: Atlas ryb ---------- */
+function Atlas() {
+  return (
+    <div>
+      <p style={{ margin: "0 0 16px", fontSize: 15.5, lineHeight: 1.65, opacity: 0.85 }}>
+        Czerwony znacznik na linijce pokazuje wymiar ochronny (cm) wg rozporządzenia — mniejsze ryby wypuszczasz. Przycisk „Zobacz zdjęcia" otwiera galerię fotografii gatunku (Wikipedia) w nowej karcie.
+        <br /><span style={{ fontSize: 13.5 }}>* szczupak + sandacz + boleń + sieja + trocie + łosoś: wspólny limit 2 szt. (RAPR PZW Poznań) &nbsp; *** lipień + pstrąg potokowy łącznie</span>
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+        {FISHES.map((f) => (
+          <div key={f.n} style={{ background: C.card, border: "1.5px solid " + C.line, borderRadius: 12, padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+              <span style={{ fontFamily: "'Zilla Slab', serif", fontSize: 20, fontWeight: 700 }}>{f.n}</span>
+              <span style={{ fontSize: 12.5, fontStyle: "italic", opacity: 0.6 }}>{f.lat}</span>
+            </div>
+            <div style={{ margin: "4px 0 6px" }}><FishPhoto fish={f} height={180} rounded /></div>
+            <Ruler wymiar={f.wymiar} />
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10, alignItems: "center" }}>
+              <Pill tone="red">{f.wymiar > 0 ? "wymiar " + f.wymiar + " cm" : "brak wymiaru ogólnop."}</Pill>
+              <Pill tone="water">{f.okres === "brak" ? "brak okresu ochr." : "ochrona " + f.okres}</Pill>
+              <Pill tone="green">{f.limit}</Pill>
+              <PhotoLink lat={f.lat} small />
+            </div>
+            {(f.wymiarNote || f.okresNote) && <p style={{ margin: "8px 0 0", fontSize: 12.5, opacity: 0.65 }}>
+              {f.wymiarNote ? "Uwaga: " + f.wymiarNote + ". " : ""}{f.okresNote ? "Okres: " + f.okresNote + "." : ""}
+            </p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+/* Pytania obrazkowe generowane z atlasu: wymiar + okres dla każdego gatunku */
+function buildFishQuestions() {
+  const okresLabel = (o) => (o === "brak" ? "Brak okresu ochronnego" : o);
+  const allWymiary = [...new Set(FISHES.filter((f) => f.wymiar > 0).map((f) => f.wymiar))];
+  const allOkresy = [...new Set(FISHES.map((f) => okresLabel(f.okres)))];
+  const pickWrong = (pool, correct, n) => shuffle(pool.filter((v) => v !== correct)).slice(0, n);
+  const qs = [];
+  FISHES.forEach((f) => {
+    if (f.wymiar > 0) {
+      const wrong = pickWrong(allWymiary, f.wymiar, 2);
+      const opts = shuffle([f.wymiar, ...wrong]).map((v) => v + " cm");
+      qs.push({
+        q: "Jaki jest wymiar ochronny tej ryby?", fish: f,
+        o: opts, k: opts.indexOf(f.wymiar + " cm"), cat: "Wymiary · " + f.n,
+        e: f.n + ": wymiar ochronny " + f.wymiar + " cm." + (f.wymiarNote ? " Uwaga: " + f.wymiarNote + "." : ""),
+      });
+    }
+    const cOk = okresLabel(f.okres);
+    const wrongOk = pickWrong(allOkresy, cOk, 2);
+    const optsOk = shuffle([cOk, ...wrongOk]);
+    qs.push({
+      q: "Jaki okres ochronny ma ta ryba?", fish: f,
+      o: optsOk, k: optsOk.indexOf(cOk), cat: "Okresy · " + f.n,
+      e: f.n + ": " + (f.okres === "brak" ? "brak okresu ochronnego." : "okres ochronny " + f.okres + ".") + (f.okresNote ? " " + f.okresNote + "." : ""),
+    });
+  });
+  return shuffle(qs);
+}
+
+
+/* Pytania wielokrotnego wyboru: zaznacz WSZYSTKIE pasujące. correct = tablica indeksów. */
+const MULTI_QUESTIONS = [
+  {
+    q: "Zaznacz wszystkie gatunki objęte całkowitą ochroną prawną.",
+    o: ["różanka", "karp", "piskorz", "okoń", "koza", "jazgarz", "strzebla błotna", "głowacz białopłetwy", "leszcz", "minogi"],
+    correct: [0, 2, 4, 6, 7, 9], cat: "Biologia",
+    e: "Pod ochroną: różanka, piskorz, koza, strzebla błotna, głowacz białopłetwy, minogi. Karp, okoń, jazgarz i leszcz to ryby łowne (bez ochrony gatunkowej).",
+  },
+  {
+    q: "Zaznacz wszystkie gatunki OBCE (introdukowane) w polskiej ichtiofaunie.",
+    o: ["amur", "szczupak", "tołpyga", "lin", "pstrąg tęczowy", "sumik karłowaty", "okoń", "czebaczek amurski"],
+    correct: [0, 2, 4, 5, 7], cat: "Biologia",
+    e: "Obce: amur, tołpyga, pstrąg tęczowy, sumik karłowaty, czebaczek amurski. Szczupak, lin i okoń są rodzime.",
+  },
+  {
+    q: "Zaznacz wszystkie ryby, które mają dobowy limit połowu (limit sztukowy).",
+    o: ["sum", "płoć", "szczupak", "leszcz", "sandacz", "węgorz", "lin", "krąp"],
+    correct: [0, 2, 4, 5, 6], cat: "Limity",
+    e: "Limit sztukowy: sum (1), szczupak i sandacz (wspólnie 2), węgorz (2), lin (w Poznaniu 2). Płoć, leszcz i krąp wchodzą do wspólnego limitu 5 kg/dobę.",
+  },
+  {
+    q: "Zaznacz wszystkie ryby łososiowate (mają płetwę tłuszczową).",
+    o: ["pstrąg potokowy", "sandacz", "lipień", "leszcz", "łosoś", "troć", "sum", "głowacica"],
+    correct: [0, 2, 4, 5, 7], cat: "Biologia",
+    e: "Łososiowate: pstrąg potokowy, lipień, łosoś, troć, głowacica. Sandacz to okoniowaty, leszcz karpiowaty, sum sumowaty.",
+  },
+  {
+    q: "Zaznacz wszystkie ryby chronione okresem od 1 stycznia do 30 kwietnia.",
+    o: ["szczupak", "sandacz", "sum", "boleń*", "węgorz", "brzana"],
+    correct: [0], cat: "Okresy",
+    e: "Tylko szczupak ma okres 1 I – 30 IV. Sandacz: 1 III – 31 V. Sum: 1 I – 31 V. Boleń od 2023 r. nie ma okresu ochronnego. Węgorz: 1 XII – 31 III. Brzana: 1 I – 30 VI.",
+  },
+  {
+    q: "Zaznacz wszystkie ryby karpiowate.",
+    o: ["kleń", "sandacz", "brzana", "miętus", "świnka", "okoń", "wzdręga", "kiełb"],
+    correct: [0, 2, 4, 6, 7], cat: "Biologia",
+    e: "Karpiowate: kleń, brzana, świnka, wzdręga, kiełb. Sandacz i okoń to okoniowate, miętus to dorszowaty.",
+  },
+  {
+    q: "Zaznacz wszystkie dokumenty, które wędkarz musi mieć nad wodą PZW.",
+    o: ["karta wędkarska", "prawo jazdy", "legitymacja PZW z opłaconymi składkami", "zezwolenie na połów", "akt urodzenia"],
+    correct: [0, 2, 3], cat: "Prawo",
+    e: "Komplet to karta wędkarska, legitymacja PZW ze składkami oraz zezwolenie od uprawnionego do rybactwa.",
+  },
+];
+
+/* ---------- Zakładka: Test ---------- */
+function Quiz() {
+  const [mode, setMode] = useState(null);        // "nauka" | "egzamin"
+  const [qs, setQs] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [picked, setPicked] = useState(null);    // wybrana odpowiedź (single)
+  const [sel, setSel] = useState([]);            // zaznaczenia (multi)
+  const [answers, setAnswers] = useState([]);    // historia { qi, picked, ok }
+  const [done, setDone] = useState(false);
+
+  const start = (m) => {
+    let pool;
+    if (m === "ryby") pool = buildFishQuestions();
+    else if (m === "multi") pool = shuffle(MULTI_QUESTIONS.map((q) => ({ ...q, multi: true })));
+    else if (m === "egzamin") {
+      const singles = shuffle(QUESTIONS).slice(0, 16);
+      const multis = shuffle(MULTI_QUESTIONS.map((q) => ({ ...q, multi: true }))).slice(0, 4);
+      pool = shuffle([...singles, ...multis]);
+    } else pool = shuffle(QUESTIONS);
+    setMode(m); setQs(pool); setIdx(0); setPicked(null); setSel([]); setAnswers([]); setDone(false);
+  };
+  const reset = () => { setMode(null); setDone(false); };
+
+  if (!mode) {
+    return (
+      <div style={{ display: "grid", gap: 12, maxWidth: 560 }}>
+        <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.65, opacity: 0.85 }}>
+          Wybierz tryb. W trybie nauki i w trybie obrazkowym po każdej odpowiedzi zobaczysz wyjaśnienie.
+          Tryb obrazkowy przepyta Cię z wymiarów i okresów ochronnych wszystkich 25 gatunków z atlasu.
+          W trybie wielokrotnego wyboru zaznaczasz WSZYSTKIE pasujące odpowiedzi — punkt liczy się tylko za komplet.
+          Egzamin próbny odwzorowuje warunki poznańskie: 20 pytań (w tym wielokrotnego wyboru), wynik na końcu, próg 80%.
+        </p>
+        <button onClick={() => start("nauka")} style={btnBig(C.water)}>Tryb nauki — wszystkie pytania z wyjaśnieniami</button>
+        <button onClick={() => start("ryby")} style={btnBig(C.green)}>Wymiary i okresy z obrazkami ryb — rozpoznajesz i odpowiadasz</button>
+        <button onClick={() => start("multi")} style={btnBig("#7A5C2E")}>Wielokrotny wybór — zaznacz wszystkie pasujące gatunki</button>
+        <button onClick={() => start("egzamin")} style={btnBig(C.red)}>Egzamin próbny — 20 pytań, próg 80%</button>
+      </div>
+    );
+  }
+
+  if (done) {
+    const ok = answers.filter((a) => a.ok).length;
+    const pct = Math.round((ok / qs.length) * 100);
+    const passed = pct >= 80;
+    const wrong = answers.filter((a) => !a.ok);
+    return (
+      <div style={{ maxWidth: 640 }}>
+        <div style={{
+          background: C.card, border: "2px solid " + (passed ? C.green : C.red), borderRadius: 14,
+          padding: "22px 20px", textAlign: "center", marginBottom: 16,
+        }}>
+          <div style={{ fontFamily: "'Zilla Slab', serif", fontSize: 42, fontWeight: 700, color: passed ? C.green : C.red }}>{pct}%</div>
+          <div style={{ fontSize: 16, marginTop: 2 }}>{ok} / {qs.length} poprawnych odpowiedzi</div>
+          <div style={{ fontFamily: "'Zilla Slab', serif", fontSize: 21, fontWeight: 600, marginTop: 8, color: passed ? C.green : C.red }}>
+            {passed ? "Zdane! Ten wynik wystarczyłby na egzaminie." : "Poniżej progu 80% — jeszcze raz przez materiały i do boju."}
+          </div>
+        </div>
+        {wrong.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <h3 style={{ fontFamily: "'Zilla Slab', serif", fontSize: 19, margin: "0 0 10px" }}>Do powtórki:</h3>
+            {wrong.map((a, i) => {
+              const q = qs[a.qi];
+              return (
+                <div key={i} style={{ background: C.card, border: "1.5px solid " + C.line, borderLeft: "4px solid " + C.red, borderRadius: 10, padding: "12px 14px", marginBottom: 8 }}>
+                  <p style={{ margin: "0 0 6px", fontWeight: 600, fontSize: 14.5 }}>{q.fish ? q.fish.n + " — " : ""}{q.q}</p>
+                  {q.multi ? (
+                    <>
+                      <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.red }}>Zaznaczono:</span> {(a.sel || []).map((i) => q.o[i]).join(", ") || "nic"}</p>
+                      <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.green }}>Poprawnie:</span> {q.correct.map((i) => q.o[i]).join(", ")}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.red }}>Twoja odpowiedź:</span> {q.o[a.picked]}</p>
+                      <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.green }}>Poprawna:</span> {q.o[q.k]}</p>
+                    </>
+                  )}
+                  <p style={{ margin: 0, fontSize: 13.5, opacity: 0.75 }}>{q.e}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button onClick={() => start(mode)} style={btnBig(C.water)}>Jeszcze raz</button>
+          <button onClick={reset} style={btnBig(C.ink)}>Zmień tryb</button>
+        </div>
+      </div>
+    );
+  }
+
+  const q = qs[idx];
+  const isMulti = !!q.multi;
+  const answered = isMulti ? picked === "done" : picked !== null;
+  const isLearn = mode === "nauka" || mode === "ryby" || mode === "multi";
+  const arrEq = (a, b) => a.length === b.length && [...a].sort().every((v, i) => v === [...b].sort()[i]);
+  const submit = (choice) => {
+    if (answered) return;
+    setPicked(choice);
+    setAnswers([...answers, { qi: idx, picked: choice, ok: choice === q.k }]);
+  };
+  const toggleSel = (oi) => {
+    if (answered) return;
+    setSel(sel.includes(oi) ? sel.filter((x) => x !== oi) : [...sel, oi]);
+  };
+  const submitMulti = () => {
+    if (answered) return;
+    setPicked("done");
+    setAnswers([...answers, { qi: idx, sel: [...sel], ok: arrEq(sel, q.correct) }]);
+  };
+  const goNext = () => {
+    if (idx + 1 >= qs.length) { setDone(true); return; }
+    setIdx(idx + 1); setPicked(null); setSel([]);
+  };
+
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, fontSize: 13.5 }}>
+        <span style={{ fontWeight: 600, color: C.water }}>{q.cat}</span>
+        <span style={{ opacity: 0.7 }}>Pytanie {idx + 1} / {qs.length}</span>
+      </div>
+      <div style={{ height: 6, background: C.line, borderRadius: 999, marginBottom: 16 }}>
+        <div style={{ height: "100%", width: ((idx + (answered ? 1 : 0)) / qs.length) * 100 + "%", background: C.water, borderRadius: 999, transition: "width .25s" }} />
+      </div>
+      <div style={{ background: C.card, border: "1.5px solid " + C.line, borderRadius: 14, padding: "18px 18px 16px" }}>
+        {q.fish && (
+          <div style={{ background: C.bg, border: "1.5px solid " + C.line, borderRadius: 10, padding: "8px 12px 2px", marginBottom: 14 }}>
+            <div style={{ maxWidth: 340, margin: "0 auto" }}><FishPhoto fish={q.fish} height={200} rounded /></div>
+            <p style={{ margin: "2px 0 6px", textAlign: "center", fontFamily: "'Zilla Slab', serif", fontSize: 17, fontWeight: 700 }}>
+              {q.fish.n} <span style={{ fontWeight: 400, fontStyle: "italic", fontSize: 13, opacity: 0.6 }}>({q.fish.lat})</span>
+            </p>
+            <div style={{ textAlign: "center", marginBottom: 10 }}><PhotoLink lat={q.fish.lat} small /></div>
+          </div>
+        )}
+        <p style={{ margin: "0 0 14px", fontFamily: "'Zilla Slab', serif", fontSize: 20, fontWeight: 600, lineHeight: 1.4 }}>{q.q}</p>
+        {isMulti && <p style={{ margin: "-8px 0 12px", fontSize: 13, color: C.water, fontWeight: 600 }}>Zaznacz wszystkie pasujące odpowiedzi, potem naciśnij „Sprawdź".</p>}
+        <div style={{ display: "grid", gap: 8 }}>
+          {q.o.map((opt, oi) => {
+            let border = C.line, bg = "transparent";
+            if (isMulti) {
+              const chosen = sel.includes(oi);
+              if (answered) {
+                const shouldBe = q.correct.includes(oi);
+                if (shouldBe) { border = C.green; bg = "rgba(47,107,69,0.10)"; }
+                else if (chosen) { border = C.red; bg = "rgba(192,58,33,0.08)"; }
+              } else if (chosen) { border = C.water; bg = "rgba(56,112,126,0.08)"; }
+              return (
+                <button key={oi} onClick={() => toggleSel(oi)} disabled={answered} style={{
+                  textAlign: "left", padding: "12px 14px", borderRadius: 10, fontSize: 15, lineHeight: 1.45,
+                  border: "1.5px solid " + border, background: bg, cursor: answered ? "default" : "pointer",
+                  fontFamily: "inherit", color: C.ink, display: "flex", alignItems: "center", gap: 10,
+                }}>
+                  <span style={{
+                    width: 20, height: 20, borderRadius: 5, flexShrink: 0, border: "2px solid " + (chosen || (answered && q.correct.includes(oi)) ? C.water : C.line),
+                    background: chosen ? C.water : "transparent", color: "#fff", fontWeight: 700, fontSize: 13,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>{chosen ? "✓" : ""}</span>
+                  <span>{opt}{answered && q.correct.includes(oi) && <span style={{ color: C.green, fontWeight: 700 }}> ✓</span>}</span>
+                </button>
+              );
+            }
+            if (answered) {
+              if (oi === q.k) { border = C.green; bg = "rgba(47,107,69,0.08)"; }
+              else if (oi === picked) { border = C.red; bg = "rgba(192,58,33,0.07)"; }
+            }
+            return (
+              <button key={oi} onClick={() => submit(oi)} disabled={answered} style={{
+                textAlign: "left", padding: "12px 14px", borderRadius: 10, fontSize: 15, lineHeight: 1.45,
+                border: "1.5px solid " + border, background: bg, cursor: answered ? "default" : "pointer",
+                fontFamily: "inherit", color: C.ink, transition: "border-color .15s",
+              }}>
+                <span style={{ fontWeight: 700, marginRight: 8, color: C.water }}>{"abc"[oi]})</span>{opt}
+              </button>
+            );
+          })}
+        </div>
+        {isMulti && !answered && (
+          <button onClick={submitMulti} disabled={sel.length === 0} style={{
+            ...btnBig(sel.length === 0 ? C.line : C.water), marginTop: 12, width: "100%",
+            cursor: sel.length === 0 ? "default" : "pointer",
+          }}>Sprawdź</button>
+        )}
+        {answered && isLearn && (
+          <p style={{ margin: "14px 0 0", padding: "12px 14px", background: C.sand, borderRadius: 10, fontSize: 14, lineHeight: 1.55 }}>
+            {(isMulti ? arrEq(sel, q.correct) : picked === q.k) ? "Dobrze! " : "Niestety nie. "}{q.e}
+          </p>
+        )}
+        {answered && (
+          <button onClick={goNext} style={{ ...btnBig(C.ink), marginTop: 14, width: "100%" }}>
+            {idx + 1 >= qs.length ? "Zobacz wynik" : "Następne pytanie"}
+          </button>
+        )}
+      </div>
+      {mode === "egzamin" && <p style={{ fontSize: 12.5, opacity: 0.6, marginTop: 10 }}>Tryb egzaminu: wyjaśnienia zobaczysz na końcu, przy pytaniach z błędami.</p>}
+    </div>
+  );
+}
+
+function btnBig(color) {
+  return {
+    padding: "13px 18px", borderRadius: 10, border: "none", background: color, color: "#fff",
+    fontSize: 15.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.01em",
+  };
+}
+
+/* ---------- Główny komponent ---------- */
+function App() {
+  const [tab, setTab] = useState("nauka");
+  const tabs = [
+    { id: "nauka", label: "Nauka" },
+    { id: "atlas", label: "Atlas ryb" },
+    { id: "test", label: "Test" },
+  ];
+  return (
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.ink, fontFamily: "'IBM Plex Sans', system-ui, sans-serif" }}>
+      <style>{"@import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap');"}</style>
+      <header style={{ background: C.ink, color: "#F2F0E6", padding: "26px 20px 22px" }}>
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+            <svg viewBox="0 0 220 90" style={{ width: 96, flexShrink: 0 }} aria-hidden="true">
+              <FishShape shape="pike" c1="#7FA98E" c2="#DCE8D2" />
+            </svg>
+            <div>
+              <h1 style={{ margin: 0, fontFamily: "'Zilla Slab', serif", fontSize: 27, fontWeight: 700, letterSpacing: "-0.01em" }}>
+                Karta wędkarska — trener egzaminacyjny
+              </h1>
+              <p style={{ margin: "4px 0 0", fontSize: 14, opacity: 0.75 }}>
+                Zakres: RAPR PZW + rozporządzenie Dz.U. 2023 poz. 1373 · Okręg Poznański: test wyboru, próg 80%
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+      <nav style={{ background: C.card, borderBottom: "1.5px solid " + C.line, position: "sticky", top: 0, zIndex: 5 }}>
+        <div style={{ maxWidth: 960, margin: "0 auto", display: "flex" }}>
+          {tabs.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              padding: "13px 20px", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
+              fontSize: 15.5, fontWeight: tab === t.id ? 700 : 500, color: tab === t.id ? C.red : C.ink,
+              borderBottom: "3px solid " + (tab === t.id ? C.red : "transparent"),
+            }}>{t.label}</button>
+          ))}
+        </div>
+      </nav>
+      <main style={{ maxWidth: 960, margin: "0 auto", padding: "22px 20px 60px" }}>
+        {tab === "nauka" && <Learn />}
+        {tab === "atlas" && <Atlas />}
+        {tab === "test" && <Quiz />}
+      </main>
+      <footer style={{ maxWidth: 960, margin: "0 auto", padding: "0 20px 30px", fontSize: 12.5, opacity: 0.6, lineHeight: 1.5 }}>
+        Materiał pomocniczy. Zweryfikowano z: ustawą z 18.04.1985 r. o rybactwie śródlądowym (m.in. art. 7–9, 27–27b) oraz §2, §5–§8 rozporządzenia MRiRW z 12.07.2023 r. (Dz.U. 2023 poz. 1373, tekst pierwotny,
+        bez późniejszych zmian) oraz RAPR Okręgu PZW w Poznaniu (ze zmianami od 1.01.2025). Okręg może aktualizować RAPR co roku —
+        przed egzaminem zajrzyj do bieżącej wersji na poznan.pzw.pl.
+      </footer>
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
