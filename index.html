@@ -206,6 +206,92 @@ const FISHES = [
     wymiar: 15, okres: "brak", limit: "w ramach 5 kg/dobę" },
   { n: "Rozpiór", lat: "Ballerus ballerus", shape: "vimba", c1: "#68707c", c2: "#e6e6de",
     wymiar: 25, okres: "brak", limit: "w ramach 5 kg/dobę" },
+  { n: "Stynka", lat: "Osmerus eperlanus", shape: "grayling", c1: "#8f97a2", c2: "#f2f2ec",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    wymiarNote: "brak wymiaru i okresu ogólnopolskiego — łowna, ale zawsze sprawdź RAPR okręgu",
+    opis: "Drobna (10–18 cm), srebrzysta ryba stynkowatych z płetwą tłuszczową (jak łososiowate). Żyje ławicowo w chłodnych, czystych jeziorach północy i w wodach przybrzeżnych Bałtyku. Bardzo wrażliwa na zanieczyszczenia; świeżo złowiona pachnie ogórkiem." },
+  { n: "Różanka", lat: "Rhodeus amarus", shape: "rudd", c1: "#8a9488", c2: "#f0efe6",
+    wymiar: 0, okres: "brak", limit: "zakaz połowu", chroniona: true,
+    opis: "Maleńka (5–8 cm) ryba karpiowata pod ścisłą ochroną gatunkową w całej Polsce — obowiązuje całkowity zakaz połowu, chwytania i przetrzymywania. Rozmnaża się wyjątkowo: samica składa ikrę przez pokładełko do jamy skrzelowej małży (skójek, szczeżui). Bez małży nie może się rozmnażać." },
+  { n: "Strzebla potokowa", lat: "Phoxinus phoxinus", shape: "asp", c1: "#7a8168", c2: "#eeeade",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    wymiarNote: "rodzima, łowna — była chroniona do 2004 r., dziś już nie (nie myl ze strzeblą BŁOTNĄ, która jest chroniona)",
+    opis: "Drobna (10–12 cm), rodzima ryba karpiowatych z chłodnych, czystych potoków i rzek górskich. Wzdłuż boku złocisty pasek, pod nim rząd ciemnych plam. Żyje w stadach; to podstawowy pokarm pstrąga potokowego. Bioindykator czystości wody." },
+  { n: "Ciernik", lat: "Gasterosteus aculeatus", shape: "perch", c1: "#6f7a80", c2: "#e8e8e0",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    wymiarNote: "rodzimy, pospolity — bez wymiaru i okresu",
+    opis: "Mała (5–8 cm) ryba ciernikowatych z 2–5 ostrymi kolcami przed płetwą grzbietową i kolcami zamiast płetw brzusznych. Znak rozpoznawczy biologii: samiec buduje z roślin gniazdo i opiekuje się ikrą oraz wylęgiem — rzadka wśród naszych ryb opieka rodzicielska. Bardzo odporny na zanieczyszczenia." },
+  { n: "Kiełb", lat: "Gobio gobio", shape: "barbel", c1: "#7d7460", c2: "#ece7d8",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    wymiarNote: "kiełb POSPOLITY jest łowny — bez wymiaru; chronione są tylko kiełb białopłetwy i kiełb Kesslera (inne gatunki)",
+    opis: "Niewielka (8–14 cm) rodzima ryba karpiowatych, przydenna, z jedną parą krótkich wąsików i szeregiem ciemnych plam wzdłuż boku. Żyje w czystych, natlenionych rzekach o żwirowo-piaszczystym dnie. Popularna przynęta na drapieżniki." },
+  { n: "Głowacz białopłetwy", lat: "Cottus gobio", shape: "burbot", c1: "#6b6258", c2: "#dcd6c8",
+    wymiar: 0, okres: "brak", limit: "zakaz połowu", chroniona: true,
+    opis: "Drobna (do 12 cm) ryba głowaczowatych pod ochroną gatunkową — całkowity zakaz połowu. Wielka, spłaszczona głowa, szerokie płetwy piersiowe, brak pęcherza pławnego (leży na dnie). Mieszka pod kamieniami w zimnych, czystych potokach. Bioindykator czystości wód." },
+  { n: "Śliz", lat: "Barbatula barbatula", shape: "eel", c1: "#7a7058", c2: "#e6dfcc",
+    wymiar: 0, okres: "brak", limit: "zakaz połowu", chroniona: true,
+    opis: "Mała (do 15 cm), wydłużona ryba kozowatych pod ochroną gatunkową — całkowity zakaz połowu. Ma 6 wąsików wokół pyska i gładką, prawie bezłuską skórę. Nocny, przydenny mieszkaniec czystych potoków i rzek. Nie mylić ze 'śluzem' (wydzielina na ciele ryby)." },
+  { n: "Piskorz", lat: "Misgurnus fossilis", shape: "eel", c1: "#6f6244", c2: "#ddd2b6",
+    wymiar: 0, okres: "brak", limit: "zakaz połowu", chroniona: true,
+    opis: "Wydłużona (do 30 cm), węgorzowata ryba kozowatych pod ochroną gatunkową — całkowity zakaz połowu. Ma 10 wąsików i potrafi oddychać jelitem (przeżywa w mule ubogim w tlen). Przed burzą staje się niespokojny — stąd dawna nazwa 'ryba-barometr'." },
+
+  /* --- rodzime łowne (drobnica) --- */
+  { n: "Karaś pospolity", lat: "Carassius carassius", shape: "carp", c1: "#8a7a44", c2: "#efe6c4",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    wymiarNote: "rodzimy, łowny — bez wymiaru ogólnopolskiego (okręg może ustalić własny)",
+    opis: "Rodzima ryba karpiowatych o wysokim, przysadzistym ciele i BEZ wąsików (to odróżnia karasia od karpia, który ma 2 pary). Bardzo wytrzymały na niedotlenienie i mróz. Populacja w zaniku — wypierany przez karasia srebrzystego." },
+  { n: "Karaś srebrzysty", lat: "Carassius gibelio", shape: "carp", c1: "#9aa0a2", c2: "#eef0ee",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę", obcy: "obcy",
+    wymiarNote: "gatunek OBCY (zaaklimatyzowany), łowny — dziś pospolitszy niż karaś pospolity",
+    opis: "Obcy, zawleczony gatunek karpiowatych o srebrzystych bokach i ciemnej otrzewnej. Też bez wąsików. Bardzo ekspansywny — wypiera rodzimego karasia pospolitego. Często rozmnaża się ginogenetycznie (same samice)." },
+  { n: "Ukleja", lat: "Alburnus alburnus", shape: "asp", c1: "#9aa4ae", c2: "#f2f4f2",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    opis: "Drobna (8–18 cm), smukła, srebrzysta ryba karpiowatych żyjąca stadnie tuż pod powierzchnią. Klasyka spławika, masowo bierze latem. Ceniona jako żywiec na drapieżniki; z jej łusek wyrabiano dawniej sztuczne perły." },
+  { n: "Krąp", lat: "Blicca bjoerkna", shape: "vimba", c1: "#8a929c", c2: "#eceee8",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    opis: "Karpiowata przypominająca leszcza, ale mniejsza (15–25 cm), o większym oku i srebrzystszych bokach; nasada płetw piersiowych i brzusznych bywa czerwonawa. Mylona z młodym leszczem — leszcz jest ciemniejszy i ma mniejsze oko." },
+  { n: "Jazgarz", lat: "Gymnocephalus cernua", shape: "perch", c1: "#7d7a5e", c2: "#e6e2cc",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    opis: "Mała (10–20 cm) ryba okoniowatych o zrośniętej płetwie grzbietowej z ostrymi kolcami i śluzowatej skórze. Żeruje przy dnie, często nocą. Bywa uważany za rybę uciążliwą (bierze na każdą przynętę)." },
+  { n: "Słonecznica", lat: "Leucaspius delineatus", shape: "asp", c1: "#9ba69a", c2: "#f0f2ea",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę",
+    opis: "Malutka (do 10 cm) rodzima ryba karpiowatych o dużych oczach i niekompletnej linii bocznej, żyjąca w małych stawach i rowach. Wrażliwa na zanieczyszczenia. Nie mylić z bassem słonecznym (obcy drapieżnik)." },
+
+  /* --- obce hodowlane / użytkowe (łowne, obce, ale NIE inwazyjne) --- */
+  { n: "Amur biały", lat: "Ctenopharyngodon idella", shape: "asp", c1: "#7f8468", c2: "#e8e6d2",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę", obcy: "obcy",
+    wymiarNote: "gatunek OBCY, hodowlany (nie inwazyjny) — sprowadzony do walki z roślinnością",
+    opis: "Duża (do 1 m), wydłużona ryba roślinożerna z Azji, wpuszczana do zbiorników, by wyjadały roślinność. Obca, ale użytkowa — w polskich warunkach zwykle się nie rozmnaża. Nie myl z klenem: amur jest większy, masywniejszy, bez czerwieni w płetwach." },
+  { n: "Tołpyga biała", lat: "Hypophthalmichthys molitrix", shape: "asp", c1: "#8a9098", c2: "#eef0ee",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę", obcy: "obcy",
+    wymiarNote: "gatunek OBCY, hodowlany (nie inwazyjny) — filtrator planktonu",
+    opis: "Duża azjatycka ryba karpiowatych z nisko osadzonymi oczami, odżywiająca się fitoplanktonem (filtrator). Wpuszczana do zbiorników dla poprawy czystości wody. Obca, ale użytkowa; w polskich warunkach zwykle się nie rozmnaża." },
+  { n: "Pstrąg tęczowy", lat: "Oncorhynchus mykiss", shape: "trout", c1: "#7f8a8c", c2: "#eceae0",
+    wymiar: 0, okres: "brak", limit: "w ramach limitu łososiowatych", obcy: "obcy",
+    wymiarNote: "gatunek OBCY (z Ameryki Płn.), hodowlany — okręg zwykle ustala własny wymiar/limit",
+    opis: "Łososiowata z tęczową, różową wstęgą wzdłuż boku i licznymi ciemnymi cętkami także na płetwie ogonowej (u pstrąga potokowego ogon jest czysty). Obcy, masowo hodowany i zarybiany. Ma płetwę tłuszczową." },
+  { n: "Pstrąg źródlany", lat: "Salvelinus fontinalis", shape: "trout", c1: "#6f7a5e", c2: "#e4e0cc", obcy: "obcy",
+    wymiar: 0, okres: "brak", limit: "w ramach limitu łososiowatych",
+    wymiarNote: "gatunek OBCY (z Ameryki Płn.), łowny — nie mylić z rodzimym pstrągiem potokowym",
+    opis: "Obcy pstrąg (właściwie golec) z charakterystycznym marmurkowym, jasno żyłkowanym grzbietem i czerwonymi kropkami w niebieskich obwódkach. Wymaga bardzo czystej, zimnej wody. Ma płetwę tłuszczową (łososiowate)." },
+  { n: "Peluga", lat: "Coregonus peled", shape: "asp", c1: "#8a929c", c2: "#eef0ee",
+    wymiar: 0, okres: "brak", limit: "w ramach 5 kg/dobę", obcy: "obcy",
+    wymiarNote: "gatunek OBCY, hodowlany — spokrewniona z sieją i sielawą",
+    opis: "Obca ryba łososiowatych (siejowate) sprowadzona z syberyjskich jezior, wpuszczana do zbiorników zaporowych. Filtruje plankton. Ma płetwę tłuszczową jak sieja i sielawa, z którymi bywa mylona." },
+
+  /* --- obce INWAZYJNE (po złowieniu NIE wypuszczać) --- */
+  { n: "Czebaczek amurski", lat: "Pseudorasbora parva", shape: "asp", c1: "#8a8470", c2: "#ece6d6",
+    wymiar: 0, okres: "brak", limit: "nie wypuszczać do wód", obcy: "inwazyjny",
+    wymiarNote: "gatunek OBCY INWAZYJNY — po złowieniu nie wolno wpuszczać do żadnych wód (§8 rozporządzenia)",
+    opis: "Mała (do 8–11 cm) azjatycka ryba, zwana też kiełbiem amurskim. Uznawana za najbardziej inwazyjny gatunek ryby w Europie — wyjada ikrę i narybek rodzimych ryb. Po złowieniu obowiązkowo usuwana z łowiska." },
+  { n: "Sumik karłowaty", lat: "Ameiurus nebulosus", shape: "catfish", c1: "#5f5748", c2: "#d8d2c2",
+    wymiar: 0, okres: "brak", limit: "nie wypuszczać do wód", obcy: "inwazyjny",
+    wymiarNote: "gatunek OBCY INWAZYJNY — po złowieniu nie wolno wpuszczać do żadnych wód (§8 rozporządzenia)",
+    opis: "Mały (do 30 cm) amerykański sum z 8 wąsikami i ostrymi, kłującymi kolcami w płetwach. Bytuje przy dnie i dominuje w małych jeziorkach oraz gliniankach, wyjadając młode ryby. Po złowieniu obowiązkowo usuwany z łowiska." },
+  { n: "Trawianka", lat: "Perccottus glenii", shape: "perch", c1: "#6b6b50", c2: "#e0dcc4",
+    wymiar: 0, okres: "brak", limit: "nie wypuszczać do wód", obcy: "inwazyjny",
+    wymiarNote: "gatunek OBCY INWAZYJNY — po złowieniu nie wolno wpuszczać do żadnych wód (§8 rozporządzenia)",
+    opis: "Mała (do 25 cm), krępa azjatycka ryba o dużej głowie i paszczy, bardzo odporna (przetrwa przemarznięcie i niedotlenienie). Żarłocznie zjada ikrę i narybek — szkodzi płoci, linowi, karasiowi. Po złowieniu obowiązkowo usuwana z łowiska." },
 ];
 
 /* Sylwetki ryb — proste, ale rozpoznawalne kształty w viewBox 220x90 */
@@ -676,12 +762,30 @@ function Atlas() {
             <div style={{ margin: "4px 0 6px" }}><FishPhoto fish={f} height={180} rounded /></div>
             <Ruler wymiar={f.wymiar} />
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10, alignItems: "center" }}>
-              <Pill tone="red">{f.wymiar > 0 ? "wymiar " + f.wymiar + " cm" : "brak wymiaru ogólnop."}</Pill>
-              <Pill tone="water">{f.okres === "brak" ? "brak okresu ochr." : "ochrona " + f.okres}</Pill>
-              <Pill tone="green">{f.limit}</Pill>
+              {f.chroniona ? (
+                <span style={{
+                  display: "inline-block", padding: "5px 12px", borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                  color: "#fff", background: C.red, letterSpacing: "0.02em",
+                }}>GATUNEK CHRONIONY — zakaz połowu</span>
+              ) : (
+                <>
+                  {f.obcy === "inwazyjny" && <span style={{
+                    display: "inline-block", padding: "5px 12px", borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                    color: "#fff", background: "#B5502A", letterSpacing: "0.01em",
+                  }}>OBCY INWAZYJNY — nie wypuszczać</span>}
+                  {f.obcy === "obcy" && <span style={{
+                    display: "inline-block", padding: "5px 12px", borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                    color: "#fff", background: "#8A7A3E", letterSpacing: "0.01em",
+                  }}>gatunek obcy</span>}
+                  <Pill tone="red">{f.wymiar > 0 ? "wymiar " + f.wymiar + " cm" : "brak wymiaru ogólnop."}</Pill>
+                  <Pill tone="water">{f.okres === "brak" ? "brak okresu ochr." : "ochrona " + f.okres}</Pill>
+                  <Pill tone="green">{f.limit}</Pill>
+                </>
+              )}
               <PhotoLink lat={f.lat} small />
             </div>
-            {(f.wymiarNote || f.okresNote) && <p style={{ margin: "8px 0 0", fontSize: 12.5, opacity: 0.65 }}>
+            {f.opis && <p style={{ margin: "8px 0 0", fontSize: 13, lineHeight: 1.55, opacity: 0.8 }}>{f.opis}</p>}
+            {(f.wymiarNote || f.okresNote) && <p style={{ margin: "6px 0 0", fontSize: 12.5, opacity: 0.65 }}>
               {f.wymiarNote ? "Uwaga: " + f.wymiarNote + ". " : ""}{f.okresNote ? "Okres: " + f.okresNote + "." : ""}
             </p>}
           </div>
@@ -712,7 +816,7 @@ function buildFishQuestions() {
     const cOk = okresLabel(f.okres);
     const wrongOk = pickWrong(allOkresy, cOk, 2);
     const optsOk = shuffle([cOk, ...wrongOk]);
-    qs.push({
+    if (!f.chroniona) qs.push({
       q: "Jaki okres ochronny ma ta ryba?", fish: f,
       o: optsOk, k: optsOk.indexOf(cOk), cat: "Okresy · " + f.n,
       e: f.n + ": " + (f.okres === "brak" ? "brak okresu ochronnego." : "okres ochronny " + f.okres + ".") + (f.okresNote ? " " + f.okresNote + "." : ""),
