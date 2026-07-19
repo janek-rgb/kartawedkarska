@@ -486,7 +486,7 @@ function PhotoLink({ lat, small }) {
 
 
 /* Zdjęcie gatunku pobierane z Wikipedii (REST API, CORS). Fallback: grafika SVG. */
-function FishPhoto({ fish, height, rounded }) {
+function FishPhoto({ fish, height, rounded, fit }) {
   const [src, setSrc] = useState(null);
   const [tried, setTried] = useState(false);
   useEffect(() => {
@@ -497,7 +497,7 @@ function FishPhoto({ fish, height, rounded }) {
         if (!r.ok) return null;
         const d = await r.json();
         if (d.type === "disambiguation") return null;
-        return (d.thumbnail && d.thumbnail.source) || (d.originalimage && d.originalimage.source) || null;
+        return (d.originalimage && d.originalimage.source) || (d.thumbnail && d.thumbnail.source) || null;
       } catch (e) { return null; }
     };
     (async () => {
@@ -511,7 +511,7 @@ function FishPhoto({ fish, height, rounded }) {
   const h = height || 170;
   if (src) {
     return <img src={src} alt={"Zdjęcie: " + fish.n} loading="lazy"
-      style={{ width: "100%", height: h, objectFit: "cover", borderRadius: rounded ? 8 : 0, display: "block", background: C.bg }}
+      style={{ width: "100%", height: h, objectFit: fit || "contain", borderRadius: rounded ? 8 : 0, display: "block", background: C.bg }}
       onError={() => setSrc(null)} />;
   }
   return (
@@ -671,6 +671,39 @@ function buildFishQuestions() {
 }
 
 
+/* Pytania rozpoznawania gatunków ze zdjęć — dwa warianty pomieszane:
+   A) pokazane zdjęcie → wybierz nazwę gatunku
+   B) podany gatunek → wybierz właściwe zdjęcie (z 4 zdjęć) */
+function buildRecognitionQuestions() {
+  const pickOthers = (correct, n) => shuffle(FISHES.filter((x) => x.n !== correct.n)).slice(0, n);
+  const qs = [];
+  FISHES.forEach((f) => {
+    // Wariant A: zdjęcie → nazwa
+    const distractA = pickOthers(f, 3);
+    const optsA = shuffle([f, ...distractA]);
+    qs.push({
+      recog: true, fish: f, hideName: true,
+      q: "Co to za ryba?",
+      o: optsA.map((x) => x.n), k: optsA.findIndex((x) => x.n === f.n),
+      cat: "Rozpoznawanie",
+      e: f.n + " (" + f.lat + ").",
+    });
+    // Wariant B: nazwa → zdjęcie
+    const distractB = pickOthers(f, 3);
+    const optsB = shuffle([f, ...distractB]);
+    qs.push({
+      recog: true, photoOptions: optsB, hideName: true,
+      q: "Które zdjęcie przedstawia gatunek: " + f.n + "?",
+      k: optsB.findIndex((x) => x.n === f.n),
+      correctName: f.n, correctLat: f.lat,
+      cat: "Rozpoznawanie",
+      e: "Poprawne zdjęcie to " + f.n + " (" + f.lat + ").",
+    });
+  });
+  return shuffle(qs);
+}
+
+
 /* Pytania wielokrotnego wyboru: zaznacz WSZYSTKIE pasujące. correct = tablica indeksów. */
 const MULTI_QUESTIONS = [
   {
@@ -730,6 +763,7 @@ function Quiz() {
   const start = (m) => {
     let pool;
     if (m === "ryby") pool = buildFishQuestions();
+    else if (m === "rozpoznawanie") pool = buildRecognitionQuestions();
     else if (m === "multi") pool = shuffle(MULTI_QUESTIONS.map((q) => ({ ...q, multi: true })));
     else if (m === "egzamin") {
       const singles = shuffle(QUESTIONS).slice(0, 16);
@@ -744,13 +778,15 @@ function Quiz() {
     return (
       <div style={{ display: "grid", gap: 12, maxWidth: 560 }}>
         <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.65, opacity: 0.85 }}>
-          Wybierz tryb. W trybie nauki i w trybie obrazkowym po każdej odpowiedzi zobaczysz wyjaśnienie.
+          Wybierz tryb. W trybie nauki, obrazkowym i rozpoznawania po każdej odpowiedzi zobaczysz wyjaśnienie.
+          Tryb rozpoznawania pokazuje zdjęcia ryb: raz pytamy „co to za ryba", raz „które zdjęcie to dany gatunek".
           Tryb obrazkowy przepyta Cię z wymiarów i okresów ochronnych wszystkich 25 gatunków z atlasu.
           W trybie wielokrotnego wyboru zaznaczasz WSZYSTKIE pasujące odpowiedzi — punkt liczy się tylko za komplet.
           Egzamin próbny odwzorowuje warunki poznańskie: 20 pytań (w tym wielokrotnego wyboru), wynik na końcu, próg 80%.
         </p>
         <button onClick={() => start("nauka")} style={btnBig(C.water)}>Tryb nauki — wszystkie pytania z wyjaśnieniami</button>
-        <button onClick={() => start("ryby")} style={btnBig(C.green)}>Wymiary i okresy z obrazkami ryb — rozpoznajesz i odpowiadasz</button>
+        <button onClick={() => start("rozpoznawanie")} style={btnBig(C.green)}>Rozpoznawanie gatunków ze zdjęć — co to za ryba?</button>
+        <button onClick={() => start("ryby")} style={btnBig("#3E6B57")}>Wymiary i okresy z obrazkami ryb — rozpoznajesz i odpowiadasz</button>
         <button onClick={() => start("multi")} style={btnBig("#7A5C2E")}>Wielokrotny wybór — zaznacz wszystkie pasujące gatunki</button>
         <button onClick={() => start("egzamin")} style={btnBig(C.red)}>Egzamin próbny — 20 pytań, próg 80%</button>
       </div>
@@ -787,6 +823,11 @@ function Quiz() {
                       <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.red }}>Zaznaczono:</span> {(a.sel || []).map((i) => q.o[i]).join(", ") || "nic"}</p>
                       <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.green }}>Poprawnie:</span> {q.correct.map((i) => q.o[i]).join(", ")}</p>
                     </>
+                  ) : q.photoOptions ? (
+                    <>
+                      <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.red }}>Wybrano zdjęcie:</span> {a.picked != null && q.photoOptions[a.picked] ? q.photoOptions[a.picked].n : "—"}</p>
+                      <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.green }}>Poprawne:</span> {q.correctName}</p>
+                    </>
                   ) : (
                     <>
                       <p style={{ margin: "0 0 4px", fontSize: 13.5 }}><span style={{ color: C.red }}>Twoja odpowiedź:</span> {q.o[a.picked]}</p>
@@ -810,7 +851,7 @@ function Quiz() {
   const q = qs[idx];
   const isMulti = !!q.multi;
   const answered = isMulti ? picked === "done" : picked !== null;
-  const isLearn = mode === "nauka" || mode === "ryby" || mode === "multi";
+  const isLearn = mode === "nauka" || mode === "ryby" || mode === "rozpoznawanie" || mode === "multi";
   const arrEq = (a, b) => a.length === b.length && [...a].sort().every((v, i) => v === [...b].sort()[i]);
   const submit = (choice) => {
     if (answered) return;
@@ -844,14 +885,39 @@ function Quiz() {
         {q.fish && (
           <div style={{ background: C.bg, border: "1.5px solid " + C.line, borderRadius: 10, padding: "8px 12px 2px", marginBottom: 14 }}>
             <div style={{ maxWidth: 340, margin: "0 auto" }}><FishPhoto fish={q.fish} height={200} rounded /></div>
-            <p style={{ margin: "2px 0 6px", textAlign: "center", fontFamily: "'Zilla Slab', serif", fontSize: 17, fontWeight: 700 }}>
-              {q.fish.n} <span style={{ fontWeight: 400, fontStyle: "italic", fontSize: 13, opacity: 0.6 }}>({q.fish.lat})</span>
-            </p>
-            <div style={{ textAlign: "center", marginBottom: 10 }}><PhotoLink lat={q.fish.lat} small /></div>
+            {(!q.hideName || answered) ? (
+              <>
+                <p style={{ margin: "2px 0 6px", textAlign: "center", fontFamily: "'Zilla Slab', serif", fontSize: 17, fontWeight: 700 }}>
+                  {q.fish.n} <span style={{ fontWeight: 400, fontStyle: "italic", fontSize: 13, opacity: 0.6 }}>({q.fish.lat})</span>
+                </p>
+                <div style={{ textAlign: "center", marginBottom: 10 }}><PhotoLink lat={q.fish.lat} small /></div>
+              </>
+            ) : <div style={{ height: 8 }} />}
           </div>
         )}
         <p style={{ margin: "0 0 14px", fontFamily: "'Zilla Slab', serif", fontSize: 20, fontWeight: 600, lineHeight: 1.4 }}>{q.q}</p>
         {isMulti && <p style={{ margin: "-8px 0 12px", fontSize: 13, color: C.water, fontWeight: 600 }}>Zaznacz wszystkie pasujące odpowiedzi, potem naciśnij „Sprawdź".</p>}
+        {q.photoOptions ? (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {q.photoOptions.map((opt, oi) => {
+              let border = C.line;
+              if (answered) {
+                if (oi === q.k) border = C.green;
+                else if (oi === picked) border = C.red;
+              } else if (oi === picked) border = C.water;
+              return (
+                <button key={oi} onClick={() => submit(oi)} disabled={answered} style={{
+                  padding: 6, borderRadius: 12, border: "2.5px solid " + border, background: C.bg,
+                  cursor: answered ? "default" : "pointer", position: "relative",
+                }}>
+                  <FishPhoto fish={opt} height={130} rounded fit="contain" />
+                  {answered && oi === q.k && <span style={{ position: "absolute", top: 8, right: 8, background: C.green, color: "#fff", borderRadius: 999, width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>✓</span>}
+                  {answered && <p style={{ margin: "4px 0 2px", textAlign: "center", fontSize: 13, fontWeight: 700, color: oi === q.k ? C.green : (oi === picked ? C.red : C.ink) }}>{opt.n}</p>}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
         <div style={{ display: "grid", gap: 8 }}>
           {q.o.map((opt, oi) => {
             let border = C.line, bg = "transparent";
@@ -892,6 +958,7 @@ function Quiz() {
             );
           })}
         </div>
+        )}
         {isMulti && !answered && (
           <button onClick={submitMulti} disabled={sel.length === 0} style={{
             ...btnBig(sel.length === 0 ? C.line : C.water), marginTop: 12, width: "100%",
