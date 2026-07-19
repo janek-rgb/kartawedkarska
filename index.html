@@ -485,34 +485,85 @@ function PhotoLink({ lat, small }) {
 }
 
 
-/* Zdjęcie gatunku pobierane z Wikipedii (REST API, CORS). Fallback: grafika SVG. */
-function FishPhoto({ fish, height, rounded, fit }) {
-  const [src, setSrc] = useState(null);
+/* Cache galerii zdjęć per gatunek (klucz: nazwa łacińska).
+   Wartość: { list: [url,...] } albo { list: null } gdy nie udało się pobrać.
+   Dzięki temu każdy gatunek pobieramy raz, a różne pytania biorą różne zdjęcia. */
+const fishGallery = {};
+
+/* Pobiera do kilku zdjęć gatunku z Wikimedia (media-list REST + summary jako pewny fallback).
+   Wszystko z domen *.wikipedia.org, które wspierają CORS i wolne licencje. */
+async function fetchGallery(fish) {
+  const key = fish.lat;
+  if (fishGallery[key]) return fishGallery[key].list;
+
+  const badWords = /\.svg$|logo|icon|map|mapa|distribution|range|stamp|drawing|zeichnung|illustration|commons-logo|edit-|question|disambig/i;
+  const urls = [];
+  const pushU = (u) => { if (u && !badWords.test(u) && !urls.includes(u)) urls.push(u); };
+
+  // 1) media-list z polskiej i angielskiej Wikipedii — zwraca WSZYSTKIE ilustracje artykułu
+  const grabMedia = async (lang, title) => {
+    try {
+      const r = await fetch("https://" + lang + ".wikipedia.org/api/rest_v1/page/media-list/" + encodeURIComponent(title));
+      if (!r.ok) return;
+      const d = await r.json();
+      (d.items || []).forEach((it) => {
+        if (it.type !== "image") return;
+        const src = it.srcset && it.srcset.length ? it.srcset[it.srcset.length - 1].src : it.src;
+        if (src) pushU(src.startsWith("//") ? "https:" + src : src);
+      });
+    } catch (e) { /* ignore */ }
+  };
+  // 2) summary — pewne, główne zdjęcie (to samo co działało dotąd)
+  const grabSummary = async (lang, title) => {
+    try {
+      const r = await fetch("https://" + lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title));
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d.type === "disambiguation") return;
+      pushU((d.originalimage && d.originalimage.source) || (d.thumbnail && d.thumbnail.source));
+    } catch (e) { /* ignore */ }
+  };
+
+  await grabMedia("pl", fish.lat);
+  if (urls.length < 4) await grabMedia("en", fish.lat);
+  if (urls.length < 2) await grabMedia("pl", fish.n);
+  await grabSummary("pl", fish.lat);
+  if (!urls.length) await grabSummary("en", fish.lat);
+
+  const list = urls.length ? urls.slice(0, 8) : null;
+  fishGallery[key] = { list };
+  return list;
+}
+
+/* Zdjęcie gatunku pobierane z Wikipedii (REST API, CORS). Fallback: grafika SVG.
+   prop `variant` (liczba) wybiera, KTÓRE zdjęcie z galerii pokazać — dzięki temu
+   ten sam gatunek w różnych pytaniach dostaje różne zdjęcia. Brak variant = główne. */
+function FishPhoto({ fish, height, rounded, fit, variant }) {
+  const [list, setList] = useState(null);
   const [tried, setTried] = useState(false);
+  const [skip, setSkip] = useState(0);   // ile kolejnych URL-i pominąć po błędzie ładowania
   useEffect(() => {
     let alive = true;
-    const grab = async (title) => {
-      try {
-        const r = await fetch("https://pl.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title));
-        if (!r.ok) return null;
-        const d = await r.json();
-        if (d.type === "disambiguation") return null;
-        return (d.originalimage && d.originalimage.source) || (d.thumbnail && d.thumbnail.source) || null;
-      } catch (e) { return null; }
-    };
+    setSkip(0);
     (async () => {
-      let u = await grab(fish.lat);
-      if (!u) u = await grab(fish.n);
+      const g = await fetchGallery(fish);
       if (!alive) return;
-      setSrc(u); setTried(true);
+      setList(g); setTried(true);
     })();
     return () => { alive = false; };
   }, [fish.lat]);
   const h = height || 170;
+
+  let src = null;
+  if (list && list.length) {
+    const base = (typeof variant === "number" ? variant : 0);
+    const i = (base + skip) % list.length;
+    if (skip < list.length) src = list[i];
+  }
   if (src) {
     return <img src={src} alt={"Zdjęcie: " + fish.n} loading="lazy"
       style={{ width: "100%", height: h, objectFit: fit || "contain", borderRadius: rounded ? 8 : 0, display: "block", background: C.bg }}
-      onError={() => setSrc(null)} />;
+      onError={() => setSkip((s) => s + 1)} />;
   }
   return (
     <div style={{ position: "relative", background: C.bg, borderRadius: rounded ? 8 : 0 }}>
@@ -677,22 +728,22 @@ function buildFishQuestions() {
 function buildRecognitionQuestions() {
   const pickOthers = (correct, n) => shuffle(FISHES.filter((x) => x.n !== correct.n)).slice(0, n);
   const qs = [];
-  FISHES.forEach((f) => {
+  FISHES.forEach((f, fi) => {
     // Wariant A: zdjęcie → nazwa
     const distractA = pickOthers(f, 3);
     const optsA = shuffle([f, ...distractA]);
     qs.push({
-      recog: true, fish: f, hideName: true,
+      recog: true, fish: f, hideName: true, photoVariant: fi,
       q: "Co to za ryba?",
       o: optsA.map((x) => x.n), k: optsA.findIndex((x) => x.n === f.n),
       cat: "Rozpoznawanie",
       e: f.n + " (" + f.lat + ").",
     });
-    // Wariant B: nazwa → zdjęcie
+    // Wariant B: nazwa → zdjęcie (każde zdjęcie-opcja z innym wariantem, by nie dublować kadru)
     const distractB = pickOthers(f, 3);
     const optsB = shuffle([f, ...distractB]);
     qs.push({
-      recog: true, photoOptions: optsB, hideName: true,
+      recog: true, photoOptions: optsB, hideName: true, photoVariant: fi + 1,
       q: "Które zdjęcie przedstawia gatunek: " + f.n + "?",
       k: optsB.findIndex((x) => x.n === f.n),
       correctName: f.n, correctLat: f.lat,
@@ -884,7 +935,7 @@ function Quiz() {
       <div style={{ background: C.card, border: "1.5px solid " + C.line, borderRadius: 14, padding: "18px 18px 16px" }}>
         {q.fish && (
           <div style={{ background: C.bg, border: "1.5px solid " + C.line, borderRadius: 10, padding: "8px 12px 2px", marginBottom: 14 }}>
-            <div style={{ maxWidth: 340, margin: "0 auto" }}><FishPhoto fish={q.fish} height={200} rounded /></div>
+            <div style={{ maxWidth: 340, margin: "0 auto" }}><FishPhoto fish={q.fish} height={200} rounded variant={q.photoVariant} /></div>
             {(!q.hideName || answered) ? (
               <>
                 <p style={{ margin: "2px 0 6px", textAlign: "center", fontFamily: "'Zilla Slab', serif", fontSize: 17, fontWeight: 700 }}>
@@ -910,7 +961,7 @@ function Quiz() {
                   padding: 6, borderRadius: 12, border: "2.5px solid " + border, background: C.bg,
                   cursor: answered ? "default" : "pointer", position: "relative",
                 }}>
-                  <FishPhoto fish={opt} height={130} rounded fit="contain" />
+                  <FishPhoto fish={opt} height={130} rounded fit="contain" variant={(q.photoVariant || 0) + oi} />
                   {answered && oi === q.k && <span style={{ position: "absolute", top: 8, right: 8, background: C.green, color: "#fff", borderRadius: 999, width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>✓</span>}
                   {answered && <p style={{ margin: "4px 0 2px", textAlign: "center", fontSize: 13, fontWeight: 700, color: oi === q.k ? C.green : (oi === picked ? C.red : C.ink) }}>{opt.n}</p>}
                 </button>
@@ -953,7 +1004,7 @@ function Quiz() {
                 border: "1.5px solid " + border, background: bg, cursor: answered ? "default" : "pointer",
                 fontFamily: "inherit", color: C.ink, transition: "border-color .15s",
               }}>
-                <span style={{ fontWeight: 700, marginRight: 8, color: C.water }}>{"abc"[oi]})</span>{opt}
+                <span style={{ fontWeight: 700, marginRight: 8, color: C.water }}>{"abcdef"[oi]})</span>{opt}
               </button>
             );
           })}
